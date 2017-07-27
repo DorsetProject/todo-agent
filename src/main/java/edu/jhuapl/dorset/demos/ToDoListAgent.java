@@ -47,8 +47,8 @@ public class ToDoListAgent extends AbstractAgent {
 
     private String name;
     private String dataStorageType;
-    private ToDoListManager manager;
-
+    private ToDoListManager manager;    
+    
     /**
      * Create a ToDoList Agent.
      * This agent creates and manipulates a user's to do list.
@@ -77,8 +77,7 @@ public class ToDoListAgent extends AbstractAgent {
      */
     public AgentResponse process(AgentRequest request) {
         if (manager == null) {
-            createAgentResponse(ResponseStatus.Code.AGENT_INTERNAL_ERROR,
-                            "Error: Agent could not set up to do list manager");
+            createAgentResponse("Error: Agent could not set up to do list manager");
         }
         String input = request.getText();
         String inputUpperCase = input.toUpperCase();
@@ -94,8 +93,7 @@ public class ToDoListAgent extends AbstractAgent {
             return get(input);
         } else {
             logger.error("Request could not be understood: " + input);
-            return createAgentResponse(ResponseStatus.Code.AGENT_DID_NOT_UNDERSTAND_REQUEST, 
-                            "Error: Your request could not be understood.");
+            return createAgentResponse("Error: Your request could not be understood.");
         }
     }
 
@@ -105,12 +103,14 @@ public class ToDoListAgent extends AbstractAgent {
      * @param responseMessage   the AgentResponse message
      * @return AgentResponse containing the responseMessage
      */
-    private AgentResponse createAgentResponse(Code responseCode, String responseMessage) {
+    private AgentResponse createAgentResponse(String responseMessage) {
         if (responseMessage.contains("manager")) {
-            return new AgentResponse(new ResponseStatus(responseCode, responseMessage));
+            return new AgentResponse(new ResponseStatus(ResponseStatus.Code.AGENT_INTERNAL_ERROR,
+                            responseMessage));
         }
-        if (responseMessage.contains("not understood")){
-            return new AgentResponse(new ResponseStatus(responseCode, responseMessage));
+        if (responseMessage.contains("not be understood")){
+            return new AgentResponse(new ResponseStatus(ResponseStatus.Code.AGENT_DID_NOT_UNDERSTAND_REQUEST,
+                            responseMessage));
         }
         else if (responseMessage.contains("Error:")) {
             logger.error(responseMessage);
@@ -118,7 +118,7 @@ public class ToDoListAgent extends AbstractAgent {
                             responseMessage));
         } else {
             return new AgentResponse(responseMessage);
-        }        
+        }
     }
 
     /**
@@ -142,7 +142,7 @@ public class ToDoListAgent extends AbstractAgent {
      */
     private AgentResponse addItem(String input) {
         String response = manager.addItem(input);
-        return createAgentResponse(ResponseStatus.Code.AGENT_DID_NOT_KNOW_ANSWER, response);
+        return createAgentResponse(response);
     }
 
     /**
@@ -200,7 +200,7 @@ public class ToDoListAgent extends AbstractAgent {
         } else {
             response = manager.removeItem(input);
         }
-        return createAgentResponse(ResponseStatus.Code.AGENT_DID_NOT_KNOW_ANSWER, response);
+        return createAgentResponse(response);
     }
 
     /**
@@ -230,8 +230,7 @@ public class ToDoListAgent extends AbstractAgent {
             return getItem(keyword);
         } else {
             logger.error("Request could not be understood: " + input);
-            return createAgentResponse(ResponseStatus.Code.AGENT_DID_NOT_UNDERSTAND_REQUEST, 
-                            "Error: Your request could not be understood.");
+            return createAgentResponse("Error: Your request could not be understood.");
         }
     }
 
@@ -291,7 +290,7 @@ public class ToDoListAgent extends AbstractAgent {
     private AgentResponse getAllText() {
         ArrayList<String> responseList = manager.getAllText();
         String response = joinList(responseList);
-        return createAgentResponse(ResponseStatus.Code.AGENT_DID_NOT_KNOW_ANSWER, response);
+        return createAgentResponse(response);
     }
 
     /**
@@ -317,7 +316,7 @@ public class ToDoListAgent extends AbstractAgent {
     private AgentResponse getAllItemsWithKeyword(String keyword) {
         ArrayList<String> responseList = manager.getAllItemsWithKeyword(keyword);
         String response = joinList(responseList);
-        return createAgentResponse(ResponseStatus.Code.AGENT_DID_NOT_KNOW_ANSWER, response);
+        return createAgentResponse(response);
     }
 
     /**
@@ -328,7 +327,7 @@ public class ToDoListAgent extends AbstractAgent {
      */
     private AgentResponse getItem(int itemNumber) {
         String response = manager.getItem(itemNumber);
-        return createAgentResponse(ResponseStatus.Code.AGENT_DID_NOT_KNOW_ANSWER, response);
+        return createAgentResponse(response);
     }
 
     /**
@@ -338,9 +337,7 @@ public class ToDoListAgent extends AbstractAgent {
      * @return AgentResponse containing the item retrieved from the to do list
      */
     private AgentResponse getItem(String input) {
-        System.out.println(input);
         String response = manager.getItem(input);
-        System.out.println(response);
-        return createAgentResponse(ResponseStatus.Code.AGENT_DID_NOT_KNOW_ANSWER, response);
+        return createAgentResponse(response);
     }
 }

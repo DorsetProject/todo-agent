@@ -99,9 +99,8 @@ public class FileManager implements ToDoListManager {
      * @return the current date
      */
     private String getDate() {
-        Date now = new Date();
         DateFormat day = new SimpleDateFormat("MM/dd/yyyy");
-        return day.format(now);
+        return day.format(new Date());
     }
 
     /**
@@ -111,16 +110,15 @@ public class FileManager implements ToDoListManager {
      * @return the current time
      */
     private String getTime() {
-        Date now = new Date();
         DateFormat time = DateFormat.getTimeInstance(DateFormat.SHORT);
-        return time.format(now);
+        return time.format(new Date());
     }
 
     /**
      * Remove an item from the ToDo list file
      *
      * @param itemNumber   the item number
-     * @return removeItem(String itemKeyword)
+     * @return the item removed
      * @throws IOException   if the item cannot be removed
      */
     public String removeItem(int itemNumber) {
@@ -131,7 +129,7 @@ public class FileManager implements ToDoListManager {
      * Remove an item from the ToDo list file
      *
      * @param itemKeyword   the keyword to find the item
-     * @return lineRemoved   the line removed from the ToDo list file
+     * @return the item removed
      * @throws IOException   if the item cannot be removed
      */
     public String removeItem(String itemKeyword) {
@@ -197,7 +195,7 @@ public class FileManager implements ToDoListManager {
 
     /**
      * Get the index where the item text starts.
-     * Occurs after "#) "
+     * Occurs after "#),"
      *
      * @param item   the item
      * @return the index where the item text starts

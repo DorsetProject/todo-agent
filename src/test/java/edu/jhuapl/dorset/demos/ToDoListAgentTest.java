@@ -34,28 +34,26 @@ import edu.jhuapl.dorset.routing.Router;
 import edu.jhuapl.dorset.routing.SingleAgentRouter;
 
 public class ToDoListAgentTest {
-    
-    public Application setUpAgent() {
+
+    public Application setUpApp() {
         Config config = ConfigFactory.load();
         Agent agent = new ToDoListAgent(config);
         Router router = new SingleAgentRouter(agent);
         Application app = new Application(router);
         return app;
     }
-    
+
     public Response makeRequest(Application app, String text) {
-        Request request = new Request(text);
-        return app.process(request);
+        return app.process(new Request(text));
     }
-    
+
     public void setOrCleanUp(Application app, String text) {
-        Request request = new Request(text);
-        app.process(request);
+        app.process(new Request(text));
     }
-    
+
     @Test
     public void testAdd() {
-        Application app = setUpAgent();
+        Application app = setUpApp();
 
         Response response = makeRequest(app, "ADD this is an item");
 
@@ -66,7 +64,7 @@ public class ToDoListAgentTest {
 
     @Test
     public void testRemoveByNumGood() {
-        Application app = setUpAgent();
+        Application app = setUpApp();
 
         Response response = makeRequest(app, "REMOVE 1");
 
@@ -77,7 +75,7 @@ public class ToDoListAgentTest {
 
     @Test
     public void testRemoveByNumBad() {
-        Application app = setUpAgent();
+        Application app = setUpApp();
 
         Response response = makeRequest(app, "REMOVE 20");
 
@@ -86,7 +84,7 @@ public class ToDoListAgentTest {
 
     @Test
     public void testRemoveByKeywordGood() {
-        Application app = setUpAgent();
+        Application app = setUpApp();
 
         setOrCleanUp(app, "ADD Buy notebook");
 
@@ -97,7 +95,7 @@ public class ToDoListAgentTest {
 
     @Test
     public void testRemoveByKeywordBad() {
-        Application app = setUpAgent();
+        Application app = setUpApp();
 
         Response response = makeRequest(app, "REMOVE non-existent item");
 
@@ -106,29 +104,29 @@ public class ToDoListAgentTest {
 
     @Test
     public void testGetAllText() {
-        Application app = setUpAgent();
+        Application app = setUpApp();
 
         Response response = makeRequest(app, "GET ALL");
 
-        assertTrue(response.getText().contains("TODO List"));
+        assertTrue(response.getText().contains("1),"));
     }
 
     @Test
     public void testGetAllItemsWithKeywordGood() {
-        Application app = setUpAgent();
+        Application app = setUpApp();
 
         setOrCleanUp(app, "ADD Buy desk organizers");
-        
+
         Response response = makeRequest(app, "GET ALL Buy");
 
-        setOrCleanUp(app, "REMOVE Buy desk organizers");
-
         assertTrue(response.getText().contains("Buy desk organizers"));
+
+        setOrCleanUp(app, "REMOVE Buy desk organizers");
     }
 
     @Test
     public void testGetAllItemsWithKeywordBad() {
-        Application app = setUpAgent();
+        Application app = setUpApp();
 
         Response response = makeRequest(app, "GET ALL non-existent");
 
@@ -137,20 +135,20 @@ public class ToDoListAgentTest {
 
     @Test
     public void testGetAllItemsWithDateGood() {
-        Application app = setUpAgent();
+        Application app = setUpApp();
 
         setOrCleanUp(app, "ADD Today's new item");
 
         Response response = makeRequest(app, "GET ALL " + new SimpleDateFormat("MM/dd/yyyy").format(new Date()));
 
-        setOrCleanUp(app, "REMOVE Today's new item");
-
         assertTrue(response.getText().contains("Today's new item"));
+
+        setOrCleanUp(app, "REMOVE Today's new item");
     }
 
     @Test
     public void testGetAllItemsWithDateBad() {
-        Application app = setUpAgent();
+        Application app = setUpApp();
 
         Response response = makeRequest(app, "GET ALL 08/30/20");
 
@@ -159,7 +157,7 @@ public class ToDoListAgentTest {
 
     @Test
     public void testGetItemByNumGood() {
-        Application app = setUpAgent();
+        Application app = setUpApp();
 
         Response response = makeRequest(app, "GET 1");
 
@@ -168,7 +166,7 @@ public class ToDoListAgentTest {
 
     @Test
     public void testGetItemByNumBad() {
-        Application app = setUpAgent();
+        Application app = setUpApp();
 
         Response response = makeRequest(app, "GET 20");
 
@@ -177,20 +175,20 @@ public class ToDoListAgentTest {
 
     @Test
     public void testGetItemByKeywordGood() {
-        Application app = setUpAgent();
-        
+        Application app = setUpApp();
+
         setOrCleanUp(app, "ADD Buy a new item");
-        
+
         Response response = makeRequest(app, "GET new item");
-        System.out.println(response.getStatus().getMessage());
-        setOrCleanUp(app, "REMOVE a new item");
 
         assertTrue(response.getText().contains("Buy a new item"));
+
+        setOrCleanUp(app, "REMOVE a new item");
     }
 
     @Test
     public void testGetItemByKeywordBad() {
-        Application app = setUpAgent();
+        Application app = setUpApp();
 
         Response response = makeRequest(app, "GET none");
 
