@@ -1,6 +1,6 @@
-# To Do List Agent  
+# TodoAgent  
 
-The ToDoListAgent is a Dorset intelligent agent that creates and manipulates a user's to do list. A user can add to, remove remove, and get items from the to do list.  
+The TodoAgent is a Dorset intelligent agent that creates and manipulates a user's to do list. The todoAgent can place the todo list in either a file or a database. A user can add to, remove remove, and get items from the to do list.  
 
 ## Configurations  
 

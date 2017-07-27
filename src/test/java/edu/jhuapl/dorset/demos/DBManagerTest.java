@@ -39,11 +39,11 @@ public class DBManagerTest {
     @Test
     public void testRemoveByNumGood() {
         DBManager manager = new DBManager("Nicole");
+        manager.addItem("An item");
         String item = manager.getItem(1);
         item = item.substring(item.indexOf("M,") + 2);
         String response = manager.removeItem(1);
-        assertTrue(response.contains("Item removed"));
-        manager.addItem(item);
+        assertTrue(response.contains("Item removed:"));
     }
     
     @Test
@@ -57,7 +57,7 @@ public class DBManagerTest {
     public void testRemoveByKeywordGood() {
         DBManager manager = new DBManager("Nicole");
         manager.addItem("item to r by keyword");
-        String response = manager.removeItem("is an item");
+        String response = manager.removeItem("item to r by keyword");
         assertTrue(response.contains("Item removed:"));
     }
     
@@ -70,9 +70,11 @@ public class DBManagerTest {
     
     @Test
     public void testGetAllText() {
-        DBManager manager = new DBManager("Nicole");      
+        DBManager manager = new DBManager("Nicole");    
+        manager.addItem("A new item");
         String response = manager.getAllText().get(0);
         assertTrue(response.contains("1),"));
+        manager.removeItem("A new item");
     }
     
     @Test
@@ -111,8 +113,10 @@ public class DBManagerTest {
     @Test
     public void testGetItemByNumGood() {
         DBManager manager = new DBManager("Nicole");
+        manager.addItem("Buy things");
         String response = manager.getItem(1);
         assertTrue(response.contains("1),"));
+        manager.removeItem("Buy things");
     }
 
     @Test
