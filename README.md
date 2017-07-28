@@ -2,11 +2,6 @@
 
 The TodoAgent is a Dorset intelligent agent that creates and manipulates a user's to do list. The todoAgent can place the list in either a file or a database, depending on the user's configurations. A user can add to, remove from, and get items from the to do list.  
 
-## Getting started
-
-Before using the ToDoAgent with a database, the user must create the database using MySQL.  
-Alternatively, the ToDoAgent will automatically create the file if it does not already exist.  
-
 ## Configurations  
 
 See sample.conf for configuration example.  

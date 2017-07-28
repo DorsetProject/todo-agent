@@ -40,13 +40,26 @@ public class DBManager implements ToDoListManager {
      * @param toDoListName   the name of ...TODO
      */
     public DBManager(String toDoListName) {
-        //TODO set up DB w toDoListName
-        //currently config must be changed to insert db Name and create vs validate
-        
+        //TODO toDoListName not used
         Configuration configuration = new Configuration().configure();
         factory = configuration.buildSessionFactory();        
     }
 
+    /**
+     * Add an item to the database
+     *
+     * @return the item to add
+     */
+    public String addItem(String item) {        
+        Session session = getSession();
+
+        Item todoItem = createItem(item);
+        session.save(todoItem);
+
+        endSession(session);
+        return "Item added: " + item;
+    }
+    
     /**
      * Create and get a new Session
      *
@@ -66,21 +79,6 @@ public class DBManager implements ToDoListManager {
     private void endSession(Session session) {
         session.getTransaction().commit();
         session.close();
-    }
-
-    /**
-     * Add an item to the database
-     *
-     * @return the item to add
-     */
-    public String addItem(String item) {        
-        Session session = getSession();
-
-        Item todoItem = createItem(item);
-        session.save(todoItem);
-
-        endSession(session);
-        return "Item added: " + item;
     }
 
     /**
