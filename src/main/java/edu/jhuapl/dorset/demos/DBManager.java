@@ -31,68 +31,104 @@ import org.slf4j.LoggerFactory;
 
 public class DBManager implements ToDoListManager {
     private static final Logger logger = LoggerFactory.getLogger(DBManager.class);
-    
-    private static SessionFactory factory;
 
+    private SessionFactory factory;
+
+    /**
+     * Create a DB Manager
+     *
+     * @param toDoListName   the name of ...TODO
+     */
     public DBManager(String toDoListName) {
-        //create a DB Manager
-        //set up DB w toDoListName
-        //if table not created -- create
-        //if table exists-- validate
-        //TODO
+        //TODO set up DB w toDoListName
+        //currently config must be changed to insert db Name and create vs validate
         
-        Configuration cfg = new Configuration();
-        cfg.configure();
-        factory = cfg.buildSessionFactory();
+        Configuration configuration = new Configuration().configure();
+        factory = configuration.buildSessionFactory();        
     }
 
     /**
-     * Add an item to the database
-     * 
-     * @return the item to add
+     * Create and get a new Session
+     *
+     * @return session   the new Session
      */
-    public String addItem(String item) {        
-        Session session = getSession();
-        
-        Item todoItem = createItem(item);
-        session.save(todoItem);
-        session.getTransaction().commit();
-        
-        return "Item added: " + item;
-    }
-    
     private Session getSession() {
         Session session = factory.openSession();
         session.beginTransaction();
         return session;
     }
-    
+
+    /**
+     * Commit and close current Session
+     *
+     * @param session   Session to close
+     */
+    private void endSession(Session session) {
+        session.getTransaction().commit();
+        session.close();
+    }
+
+    /**
+     * Add an item to the database
+     *
+     * @return the item to add
+     */
+    public String addItem(String item) {        
+        Session session = getSession();
+
+        Item todoItem = createItem(item);
+        session.save(todoItem);
+
+        endSession(session);
+        return "Item added: " + item;
+    }
+
+    /**
+     * Create a new item with given task
+     *
+     * @param task   the task for the new item
+     * @return todoItem   the new item to be added
+     */
     private Item createItem(String task) {
         Item todoItem = new Item();
-        
-        int listNumber = countItems() + 1;
+
+        int listNumber = getItemCount() + 1;
         todoItem.setListNumber(listNumber);
         todoItem.setTask(task);
         todoItem.setDateCreated(getDate());
         todoItem.setTimeCreated(getTime());
-        
+
         return todoItem;
     }
-    
-    private int countItems() {
+
+    /**
+     * get the number of items in the database
+     *
+     * @return itemCount   the number of items in the database
+     */
+    private int getItemCount() {
         Session session = getSession();
-        
-        //TODO make method for hql
+
         String hql = "SELECT COUNT(item_id) FROM " + Item.class.getName();
         Query query = session.createQuery(hql);
-        
-        //TODO make method for this too
-        String response = query.list().toString();
-        response = response.substring(1, response.indexOf("]"));
+        String response = getQueryResponse(query);
         int itemCount = Integer.parseInt(response);
         
-        session.getTransaction().commit();
+        endSession(session);
         return itemCount;
+    }
+
+    /**
+     * Get response from query
+     *
+     * @param session   the current Session
+     * @param hql   the HQL query
+     * @return response   the query response
+     */
+    private String getQueryResponse(Query query) {
+        String response = query.list().toString();
+        response = response.substring(1, response.indexOf("]"));
+        return response;
     }
 
     /**
@@ -118,7 +154,7 @@ public class DBManager implements ToDoListManager {
         DateFormat time = DateFormat.getTimeInstance(DateFormat.SHORT);
         return time.format(now);
     }
-    
+
     /**
      * Remove an item from the database based on its item number
      * 
@@ -126,38 +162,37 @@ public class DBManager implements ToDoListManager {
      */
     public String removeItem(int itemNumber) {
         Session session = getSession();
-        
-        //TODO look at combining parts of the two removeItem functions
-        
+
         Item item = (Item) session.createCriteria(Item.class)
                         .add(Restrictions.eq("listNumber", itemNumber)).uniqueResult();
         if (item != null){
-            session.delete(item);
-            int listNumberDeleted = item.getListNumber();
-            updateListNumbers(listNumberDeleted);
+            deleteItemAndUpdateList(session, item);
         } else {
             logger.error("Item could not be removed");
             return "Error: Item could not be added";
         }
-        
-        session.getTransaction().commit();
+
+        endSession(session);
         return "Item removed: " + item.toString();
     }
-    
+
+    private void deleteItemAndUpdateList(Session session,Item item) {
+        session.delete(item);
+        int listNumberDeleted = item.getListNumber();
+
+        updateListNumbers(session,listNumberDeleted);
+    }
+
     /**
      * Update database values in list_number
      *
      * @param listNumberDeleted   the list_number deleted from the database
      */
-    public void updateListNumbers(int listNumberDeleted) {
-        Session session = getSession();
-        
-        //TODO make method for this
-        String hql = "UPDATE " + Item.class.getName() + " SET list_number = list_number -1 WHERE list_number > " + listNumberDeleted;
+    public void updateListNumbers(Session session,int listNumberDeleted) {
+        String hql = "UPDATE " + Item.class.getName() + " SET list_number = list_number -1 WHERE list_number > "
+                        + listNumberDeleted;
         Query query = session.createQuery(hql);
         query.executeUpdate();
-        
-        session.getTransaction().commit();
     }
 
     /**
@@ -167,22 +202,25 @@ public class DBManager implements ToDoListManager {
      */
     public String removeItem(String itemKeyword) {
         ArrayList<Item> items = getAllItems();
-        
+
+        if (items.isEmpty()) {
+            logger.error("No item matched request");
+            return "Error: Item could not be removed. No item matched your request";
+        }
+
         for (int n = 0; n < items.size(); n++) {
             if (items.get(n).toString().contains(itemKeyword)) {
                 Session session = getSession();
-                
-                session.delete(items.get(n));
-                int listNumberDeleted = items.get(n).getListNumber();
-                updateListNumbers(listNumberDeleted);
-                session.getTransaction().commit();
+                deleteItemAndUpdateList(session, items.get(n));
+
+                endSession(session);
                 return  "Item removed: " + items.get(n).toString();
             }
         }
         logger.error("Item could not be removed");
         return "Error: Item could not be removed. No item number or keyword matched your request";
     }
-    
+
     /**
      * Get all items from database
      * 
@@ -190,50 +228,45 @@ public class DBManager implements ToDoListManager {
      */
     private ArrayList<Item> getAllItems() {
         Session session = getSession();
-        
+
         ArrayList<Item> items = new ArrayList<Item>();
-        
-        for (int n = 1; n <= countItems(); n++) {
+
+        for (int n = 1; n <= getItemCount(); n++) {
             Item item = (Item) session.createCriteria(Item.class)
                         .add(Restrictions.eq("listNumber", n)).uniqueResult();
             if (item != null){
                 items.add(item);
             }
         }
-        
-        if (items.isEmpty()) {
-            logger.error("Could not retrieve text");
-            items.add(new Item(0, "Error: Could not retrieve text", "", ""));
-        } //TODO -- not sure about this...
-        
-        session.getTransaction().commit();
+
+        endSession(session);
         return items;
     }
     
     /**
-     * Get all text from database table
+     * Get all text from database
      * 
      * @return items   ArrayList of text from database
      */
     public ArrayList<String> getAllText() {
         Session session = getSession();
-       
+
         ArrayList<String> text = new ArrayList<String>();
-        
-        for (int n = 1; n <= countItems(); n++) {
+
+        for (int n = 1; n <= getItemCount(); n++) {
             Item item = (Item) session.createCriteria(Item.class)
                         .add(Restrictions.eq("listNumber", n)).uniqueResult();
             if (item != null){
                 text.add(item.toString());
             }
         }
-        
+
         if (text.isEmpty()) {
             logger.error("Could not retrieve text");
             text.add("Error: Could not retrieve text");
         }
-        
-        session.getTransaction().commit();
+
+        endSession(session);
         return text;
     }
 
