@@ -85,10 +85,10 @@ public class FileManager implements ToDoListManager {
 
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file, true))) {
             bufferedWriter.write("\n" + text.size() + ")," + getDate() + "," + getTime() + "," + item);
-            return "Item added: " + item;
+            return item;
         } catch (IOException e) {
             logger.error("Item could not be added: " + item);
-            return "Error: Item could not be added: " + item;
+            return "Error";
         }
     }
 
@@ -162,13 +162,13 @@ public class FileManager implements ToDoListManager {
             }
 
             if (lineRemoved.isEmpty()) {
-                return "Error: Item could not be removed. No item number or keyword matched your request";
+                return "Error";
             }
         } catch (IOException e) {
             logger.error("Item could not be removed");
-            return "Error: Item could not be removed";
+            return "Error";
         }
-        return "Item removed: " + lineRemoved;
+        return lineRemoved;
     }
 
     /**
@@ -219,7 +219,7 @@ public class FileManager implements ToDoListManager {
             }
         } catch (IOException e) {
             logger.error("Could not retrieve text");
-            text.add("Error: Could not retrieve text");
+            text.add("Error");
         }
         return text;
     }
@@ -242,7 +242,7 @@ public class FileManager implements ToDoListManager {
             }
 
             if (itemsWithKeyword.isEmpty()) {
-                itemsWithKeyword.add("Error: No items matched your keyword");
+                itemsWithKeyword.add("Error");
             }
             return itemsWithKeyword;
      }
@@ -273,6 +273,6 @@ public class FileManager implements ToDoListManager {
                 return text.get(n);
             }
         }
-        return "Error: Item could not be found";
+        return "Error";
     }
 }

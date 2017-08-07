@@ -77,7 +77,9 @@ public class ToDoListAgent extends AbstractAgent {
      */
     public AgentResponse process(AgentRequest request) {
         if (manager == null) {
-            createAgentResponse("Error: Agent could not set up to do list manager");
+            String responseMessage = "Error: Agent could not set up to do list manager";
+            Code responseCode = getAgentResponseStatusCode(responseMessage);
+            createAgentResponse(responseCode, responseMessage);
         }
         String input = request.getText();
         String inputUpperCase = input.toUpperCase();
@@ -93,31 +95,47 @@ public class ToDoListAgent extends AbstractAgent {
             return get(input);
         } else {
             logger.error("Request could not be understood: " + input);
-            return createAgentResponse("Error: Your request could not be understood.");
+            String responseMessage = "Error: Your request could not be understood. "
+                            + "Please use one of the following in your requests: \"ADD\", \"REMOVE\", or \"GET\"";
+            Code responseCode = getAgentResponseStatusCode("not understood");
+            return createAgentResponse(responseCode, responseMessage);
         }
+    }
+    
+    /**
+     * Get Agent Response Status Code
+     *
+     * @param responseMessage   the message to be used to determine which code to return
+     * @return the appropriate Agent Response Status Code
+     */
+    private Code getAgentResponseStatusCode(String responseMessage) {
+        Code code;
+        if (responseMessage.contains("manager")) {
+            code = Code.AGENT_INTERNAL_ERROR;
+        }
+        else if (responseMessage.contains("not be understood")){
+            code = Code.AGENT_DID_NOT_UNDERSTAND_REQUEST;
+        }
+        else if (responseMessage.contains("Error")) {
+            code = Code.AGENT_DID_NOT_KNOW_ANSWER;
+        } else {
+            code = Code.SUCCESS;
+        }
+        return code;
     }
 
     /**
-     * Create AgentResponse based on the text passed in
+     * Create an Agent Response based on the code and message passed in
      *
-     * @param responseMessage   the AgentResponse message
+     * @param code   the Agent Response Status Code
+     * @param responseMessage   the Agent Response message
      * @return AgentResponse containing the responseMessage
      */
-    private AgentResponse createAgentResponse(String responseMessage) {
-        if (responseMessage.contains("manager")) {
-            return new AgentResponse(new ResponseStatus(ResponseStatus.Code.AGENT_INTERNAL_ERROR,
-                            responseMessage));
-        }
-        if (responseMessage.contains("not be understood")){
-            return new AgentResponse(new ResponseStatus(ResponseStatus.Code.AGENT_DID_NOT_UNDERSTAND_REQUEST,
-                            responseMessage));
-        }
-        else if (responseMessage.contains("Error:")) {
-            logger.error(responseMessage);
-            return new AgentResponse(new ResponseStatus(ResponseStatus.Code.AGENT_DID_NOT_KNOW_ANSWER,
-                            responseMessage));
-        } else {
+    private AgentResponse createAgentResponse(Code code, String responseMessage) {
+        if (code.equals(Code.SUCCESS)) {
             return new AgentResponse(responseMessage);
+        } else {
+            return new AgentResponse(new ResponseStatus(code, responseMessage));
         }
     }
 
@@ -141,8 +159,18 @@ public class ToDoListAgent extends AbstractAgent {
      * @return AgentResponse containing the item added to the to do list
      */
     private AgentResponse addItem(String input) {
-        String response = manager.addItem(input);
-        return createAgentResponse(response);
+        String managerResponse = manager.addItem(input);
+
+        Code responseCode = getAgentResponseStatusCode(managerResponse);
+        String responseMessage;
+        if (responseCode.equals(Code.SUCCESS)) {
+            responseMessage = "Item added: " + managerResponse;
+        } else {
+            logger.error("Item could not be added");
+            responseMessage = "Error: Item could not be added";
+        }
+
+        return createAgentResponse(responseCode, responseMessage);
     }
 
     /**
@@ -172,6 +200,40 @@ public class ToDoListAgent extends AbstractAgent {
     }
 
     /**
+     * Remove an item from the to do list
+     *
+     * @param input   the item to remove
+     * @return AgentResponse containing the item removed from the to do list
+     */
+    private AgentResponse removeItem(String input) {
+        String managerResponse = getRemoveItemManagerResponse(input);
+        
+        Code responseCode = getAgentResponseStatusCode(managerResponse);
+        String responseMessage;
+        if (responseCode.equals(Code.SUCCESS)) {
+            responseMessage = "Item removed: " + managerResponse;
+        } else {
+            responseMessage = "Error: Item could not be removed. Try a different item number or keyword";
+        }
+
+        return createAgentResponse(responseCode, responseMessage);
+    }
+    
+    /**
+     * Get manager response from removing an item
+     *
+     * @param input
+     * @return the manager response message
+     */
+    private String getRemoveItemManagerResponse(String input) {
+        if (containsInt(input)) {
+            return manager.removeItem(getitemNumber(input));
+        } else {
+            return manager.removeItem(input);
+        }
+    }
+
+    /**
      * Get the item number
      *
      * @param input   the input to retrieve the item number from
@@ -185,22 +247,6 @@ public class ToDoListAgent extends AbstractAgent {
             }
         }
         return 0;
-    }
-
-    /**
-     * Remove an item from the to do list
-     *
-     * @param input   the item to remove
-     * @return AgentResponse containing the item removed from the to do list
-     */
-    private AgentResponse removeItem(String input) {
-        String response;
-        if (containsInt(input)) {
-            response = manager.removeItem(getitemNumber(input));
-        } else {
-            response = manager.removeItem(input);
-        }
-        return createAgentResponse(response);
     }
 
     /**
@@ -229,8 +275,10 @@ public class ToDoListAgent extends AbstractAgent {
         } else if (!keywordIsEmpty) {
             return getItem(keyword);
         } else {
-            logger.error("Request could not be understood: " + input);
-            return createAgentResponse("Error: Your request could not be understood.");
+            logger.error("Request could not be understood: " + input); 
+            String responseMessage = "Error: Your request could not be understood.";
+            Code responseCode = getAgentResponseStatusCode(responseMessage);
+            return createAgentResponse(responseCode, responseMessage);
         }
     }
 
@@ -288,9 +336,19 @@ public class ToDoListAgent extends AbstractAgent {
      * @return AgentResponse containing the to do list text
      */
     private AgentResponse getAllText() {
-        ArrayList<String> responseList = manager.getAllText();
-        String response = joinList(responseList);
-        return createAgentResponse(response);
+        ArrayList<String> managerResponseList = manager.getAllText();
+        String managerResponse = joinList(managerResponseList);
+        
+        Code responseCode = getAgentResponseStatusCode(managerResponse);
+        String responseMessage;
+        if (responseCode.equals(Code.SUCCESS)) {
+            responseMessage = managerResponse;
+        } else {
+            logger.error("Could not retrieve text");
+            responseMessage = "Error: Could not retrieve text";
+        }
+
+        return createAgentResponse(responseCode, responseMessage);
     }
 
     /**
@@ -314,9 +372,18 @@ public class ToDoListAgent extends AbstractAgent {
      * @return AgentResponse containing the items retrieved from the to do list
      */
     private AgentResponse getAllItemsWithKeyword(String keyword) {
-        ArrayList<String> responseList = manager.getAllItemsWithKeyword(keyword);
-        String response = joinList(responseList);
-        return createAgentResponse(response);
+        ArrayList<String> managerResponseList = manager.getAllItemsWithKeyword(keyword);
+        String managerResponse = joinList(managerResponseList);
+
+        Code responseCode = getAgentResponseStatusCode(managerResponse);
+        String responseMessage;
+        if (responseCode.equals(Code.SUCCESS)) {
+            responseMessage = managerResponse;
+        } else {
+            responseMessage = "Error: No items matched your keyword";
+        }
+
+        return createAgentResponse(responseCode, responseMessage);
     }
 
     /**
@@ -326,8 +393,17 @@ public class ToDoListAgent extends AbstractAgent {
      * @return AgentResponse containing the item retrieved from the to do list
      */
     private AgentResponse getItem(int itemNumber) {
-        String response = manager.getItem(itemNumber);
-        return createAgentResponse(response);
+        String managerResponse = manager.getItem(itemNumber);
+        
+        Code responseCode = getAgentResponseStatusCode(managerResponse);
+        String responseMessage;
+        if (responseCode.equals(Code.SUCCESS)) {
+            responseMessage = managerResponse;
+        } else {
+            responseMessage = "Error: Item could not be found";
+        }
+
+        return createAgentResponse(responseCode, responseMessage);
     }
 
     /**
@@ -337,7 +413,16 @@ public class ToDoListAgent extends AbstractAgent {
      * @return AgentResponse containing the item retrieved from the to do list
      */
     private AgentResponse getItem(String input) {
-        String response = manager.getItem(input);
-        return createAgentResponse(response);
+        String managerResponse = manager.getItem(input);
+        
+        Code responseCode = getAgentResponseStatusCode(managerResponse);
+        String responseMessage;
+        if (responseCode.equals(Code.SUCCESS)) {
+            responseMessage = managerResponse;
+        } else {
+            responseMessage = "Error: Item could not be found";
+        }
+
+        return createAgentResponse(responseCode, responseMessage);
     }
 }

@@ -57,7 +57,7 @@ public class DBManager implements ToDoListManager {
         session.save(todoItem);
 
         endSession(session);
-        return "Item added: " + item;
+        return item; //"Item added: " + 
     }
     
     /**
@@ -167,11 +167,11 @@ public class DBManager implements ToDoListManager {
             deleteItemAndUpdateList(session, item);
         } else {
             logger.error("Item could not be removed");
-            return "Error: Item could not be added";
+            return "Error"; //: Item could not be added
         }
 
         endSession(session);
-        return "Item removed: " + item.toString();
+        return item.toString(); //"Item removed: " + 
     }
 
     private void deleteItemAndUpdateList(Session session,Item item) {
@@ -212,11 +212,11 @@ public class DBManager implements ToDoListManager {
                 deleteItemAndUpdateList(session, items.get(n));
 
                 endSession(session);
-                return  "Item removed: " + items.get(n).toString();
+                return items.get(n).toString(); // "Item removed: " + 
             }
         }
         logger.error("Item could not be removed");
-        return "Error: Item could not be removed. No item number or keyword matched your request";
+        return "Error"; //: Item could not be removed. No item number or keyword matched your request
     }
 
     /**
@@ -261,7 +261,7 @@ public class DBManager implements ToDoListManager {
 
         if (text.isEmpty()) {
             logger.error("Could not retrieve text");
-            text.add("Error: Could not retrieve text");
+            text.add("Error"); //: Could not retrieve text
         }
 
         endSession(session);
@@ -286,7 +286,7 @@ public class DBManager implements ToDoListManager {
         }
 
         if (itemsWithKeyword.isEmpty()) {
-            itemsWithKeyword.add("Error: No items matched your keyword");
+            itemsWithKeyword.add("Error"); //: No items matched your keyword
         }
         return itemsWithKeyword;
     }
@@ -317,6 +317,6 @@ public class DBManager implements ToDoListManager {
                 return text.get(n);
             }
         }
-        return "Error: Item could not be found";
+        return "Error"; //: Item could not be found
     }
 }

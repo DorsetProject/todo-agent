@@ -35,7 +35,7 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");
 
             String response = manager.addItem("this is an item");
-            assertTrue(response.contains("Item added:"));
+            assertTrue(response.contains("is an item"));
 
             manager.removeItem("is an item");
         } catch (IOException e) {
@@ -51,7 +51,7 @@ public class FileManagerTest {
             item = item.substring(item.indexOf("M,") + 2);
 
             String response = manager.removeItem(1);
-            assertTrue(response.contains("Item removed:"));
+            assertTrue(response.contains("1)"));
 
             manager.addItem(item);
         } catch (IOException e) {
@@ -65,7 +65,7 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");
 
             String response = manager.removeItem(20);
-            assertTrue(response.contains("Error:"));
+            assertTrue(response.contains("Error"));
         } catch (IOException e) {
             assertFalse(false);
         }
@@ -78,7 +78,7 @@ public class FileManagerTest {
             manager.addItem("item to r by keyword");
 
             String response = manager.removeItem("item to r");
-            assertTrue(response.contains("Item removed:"));
+            assertTrue(response.contains("item to r"));
         } catch (IOException e) {
             assertFalse(false);
         }
@@ -90,7 +90,7 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");
 
             String response = manager.removeItem("non-existent item");
-            assertTrue(response.contains("Error: "));
+            assertTrue(response.contains("Error"));
         } catch (IOException e) {
             assertFalse(false);
         }
@@ -115,7 +115,8 @@ public class FileManagerTest {
             manager.addItem("Buy supplies");
 
             ArrayList<String> response = manager.getAllItemsWithKeyword("Buy");
-            assertTrue(!response.get(0).contains("Error:"));
+            assertTrue(response.get(0).contains("Buy"));
+            assertFalse(response.get(0).contains("Error"));
 
             manager.removeItem("Buy supplies");
         } catch (IOException e) {
@@ -129,7 +130,7 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");
 
             ArrayList<String> response = manager.getAllItemsWithKeyword("non-existent items");
-            assertTrue(response.get(0).contains("Error: "));
+            assertTrue(response.get(0).contains("Error"));
         } catch (IOException e) {
             assertFalse(false);
         }
@@ -157,7 +158,7 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");
 
             ArrayList<String> response = manager.getAllItemsWithKeyword("July");
-            assertTrue(response.get(0).contains("Error: "));
+            assertTrue(response.get(0).contains("Error"));
         } catch (IOException e) {
             assertFalse(false);
         }
@@ -181,7 +182,7 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");
 
             String response = manager.getItem(20);
-            assertTrue(response.contains("Error: "));
+            assertTrue(response.contains("Error"));
         } catch (IOException e) {
             assertFalse(false);
         }
@@ -208,7 +209,7 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");
 
             String response = manager.getItem("non-existent item");
-            assertTrue(response.contains("Error: "));
+            assertTrue(response.contains("Error"));
         } catch (IOException e) {
             assertFalse(false);
         }

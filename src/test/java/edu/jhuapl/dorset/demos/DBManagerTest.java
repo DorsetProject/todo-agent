@@ -16,6 +16,7 @@
  */
 package edu.jhuapl.dorset.demos;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.text.SimpleDateFormat;
@@ -44,7 +45,9 @@ public class DBManagerTest {
         item = item.substring(item.indexOf("M,") + 2);
 
         String response = manager.removeItem(1);
-        assertTrue(response.contains("Item removed:"));
+        assertFalse(response.contains("Error"));
+
+        manager.addItem(item);
     }
 
     @Test
@@ -52,7 +55,7 @@ public class DBManagerTest {
         DBManager manager = new DBManager("Nicole");
 
         String response = manager.removeItem(20);
-        assertTrue(response.contains("Error:"));
+        assertTrue(response.contains("Error"));
     }
 
     @Test
@@ -61,7 +64,7 @@ public class DBManagerTest {
         manager.addItem("item to r by keyword");
 
         String response = manager.removeItem("item to r by keyword");
-        assertTrue(response.contains("Item removed:"));
+        assertFalse(response.contains("Error"));
     }
 
     @Test
@@ -69,7 +72,7 @@ public class DBManagerTest {
         DBManager manager = new DBManager("Nicole");
 
         String response = manager.removeItem("non-existent item");
-        assertTrue(response.contains("Error:"));
+        assertTrue(response.contains("Error"));
     }
 
     @Test
@@ -89,7 +92,7 @@ public class DBManagerTest {
         manager.addItem("Buy supplies");
 
         ArrayList<String> response = manager.getAllItemsWithKeyword("Buy");
-        assertTrue(!response.get(0).contains("Error:"));
+        assertTrue(!response.get(0).contains("Error"));
 
         manager.removeItem("Buy supplies");
     }
@@ -99,9 +102,9 @@ public class DBManagerTest {
         DBManager manager = new DBManager("Nicole");
 
         ArrayList<String> response = manager.getAllItemsWithKeyword("non-existent items");
-        assertTrue(response.get(0).contains("Error:"));
+        assertTrue(response.get(0).contains("Error"));
     }
-    
+
     @Test
     public void testGetAllItemsWithDateGood() {
         DBManager manager = new DBManager("Nicole");
@@ -119,7 +122,7 @@ public class DBManagerTest {
         DBManager manager = new DBManager("Nicole");
 
         ArrayList<String> response = manager.getAllItemsWithKeyword("July");
-        assertTrue(response.get(0).contains("Error:"));
+        assertTrue(response.get(0).contains("Error"));
     }
 
     @Test
@@ -138,7 +141,7 @@ public class DBManagerTest {
         DBManager manager = new DBManager("Nicole");
 
         String response = manager.getItem(20);
-        assertTrue(response.contains("Error:"));
+        assertTrue(response.contains("Error"));
     }
 
     @Test
@@ -157,6 +160,6 @@ public class DBManagerTest {
         DBManager manager = new DBManager("Nicole");
 
         String response = manager.getItem("non-existent item");
-        assertTrue(response.contains("Error:"));
+        assertTrue(response.contains("Error"));
     }
 }
