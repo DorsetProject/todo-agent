@@ -194,4 +194,16 @@ public class ToDoListAgentTest {
 
         assertTrue(response.getStatus().getMessage().contains("Error:"));
     }
+    
+    @Test 
+    public void testBadConfig() {
+        Config config = ConfigFactory.load("sample");
+        Agent agent = new ToDoListAgent(config);
+        Router router = new SingleAgentRouter(agent);
+        Application app = new Application(router);
+        
+        Response response = makeRequest(app, "GET none");
+        
+        assertTrue(response.getStatus().getMessage().contains("Agent could not set up"));
+    }
 }

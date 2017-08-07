@@ -41,9 +41,9 @@ public class FileManager implements ToDoListManager {
      * Create a FileManager
      *
      * @param toDoListName   the name of the ToDo list
-     * @throws IOException 
+     * @throws ToDoListAccessException
      */
-    public FileManager(String toDoListName) throws IOException {
+    public FileManager(String toDoListName) throws ToDoListAccessException {
         file = new File("./" + toDoListName + ".csv");
         this.toDoListName = toDoListName;
 
@@ -53,24 +53,25 @@ public class FileManager implements ToDoListManager {
                 writeTitle(file, "'s TODO List:");
             }
         } catch (IOException e) {
-            logger.error("Could not create file"); //TODO
-            throw new IOException("Could not create file", e);
+            //logger.error("Could not create file");
+            throw new ToDoListAccessException("Could not create file", e);
         }
     }
 
     /**
      * Write the title of the file
+     * @throws ToDoListAccessException 
      *
      * @throws IOException   if the file exists but is a directory rather
      * than a regular file or cannot be opened for some reason
      */
-    private void writeTitle(File file, String titleExtension) {
+    private void writeTitle(File file, String titleExtension) throws IOException {
         try {
             BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
             bufferedWriter.write(toDoListName + titleExtension);
             bufferedWriter.close();
         } catch (IOException e) {
-            logger.error("Could not write title" + e);
+            throw new IOException("Could not write title", e);
         }
     }
 
@@ -78,17 +79,22 @@ public class FileManager implements ToDoListManager {
      * Add an item to the ToDo list file
      *
      * @param item   the item to add
-     * @throws IOException
+     * @throws ToDoListAccessException 
      */
-    public String addItem(String item) {
-        ArrayList<String> text = getAllText();
+    public String addItem(String item) throws ToDoListAccessException {
+        ArrayList<String> text;
+        try {
+            text = getAllText();
+        } catch (ToDoListAccessException e) {
+            throw new ToDoListAccessException(e.getMessage(), e);
+        }
 
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file, true))) {
             bufferedWriter.write("\n" + text.size() + ")," + getDate() + "," + getTime() + "," + item);
             return item;
         } catch (IOException e) {
-            logger.error("Item could not be added: " + item);
-            return "Error";
+            //logger.error("Item could not be added: " + item);
+            throw new ToDoListAccessException("Item could not be added: " + item, e);
         }
     }
 
@@ -119,10 +125,15 @@ public class FileManager implements ToDoListManager {
      *
      * @param itemNumber   the item number
      * @return the item removed
+     * @throws ToDoListAccessException 
      * @throws IOException   if the item cannot be removed
      */
-    public String removeItem(int itemNumber) {
-        return removeItem(itemNumber + "),");
+    public String removeItem(int itemNumber) throws ToDoListAccessException {
+        try {
+            return removeItem(itemNumber + "),");
+        } catch (ToDoListAccessException e){
+            throw new ToDoListAccessException(e.getMessage(), e);
+        }
     }
 
     /**
@@ -130,11 +141,16 @@ public class FileManager implements ToDoListManager {
      *
      * @param itemKeyword   the keyword to find the item
      * @return the item removed
+     * @throws ToDoListAccessException 
      * @throws IOException   if the item cannot be removed
      */
-    public String removeItem(String itemKeyword) {
-        ArrayList<String> text = getAllText();
-        return rewriteFileWithoutRemoved(text, itemKeyword);
+    public String removeItem(String itemKeyword) throws ToDoListAccessException {
+        try {
+            ArrayList<String> text = getAllText();
+            return rewriteFileWithoutRemoved(text, itemKeyword);
+        } catch (ToDoListAccessException | IOException e){
+            throw new ToDoListAccessException(e.getMessage(), e);
+        }
     }
 
     /**
@@ -144,8 +160,9 @@ public class FileManager implements ToDoListManager {
      * @param text   the text from the ToDo list file
      * @param itemKeyword   the keyword to find the item
      * @return lineRemoved   the line removed from the ToDo list file
+     * @throws ToDoListAccessException 
      */
-    private String rewriteFileWithoutRemoved(ArrayList<String> text, String itemKeyword) {
+    private String rewriteFileWithoutRemoved(ArrayList<String> text, String itemKeyword) throws IOException {
         int counter = 0;
         String lineRemoved = "";
 
@@ -162,11 +179,11 @@ public class FileManager implements ToDoListManager {
             }
 
             if (lineRemoved.isEmpty()) {
-                return "Error";
+                return "";
             }
         } catch (IOException e) {
-            logger.error("Item could not be removed");
-            return "Error";
+            //logger.error("Item could not be removed");
+            throw new IOException("Item could not be removed", e);
         }
         return lineRemoved;
     }
@@ -208,8 +225,9 @@ public class FileManager implements ToDoListManager {
      * Get all the text from the ToDo list file
      *
      * @return text   the text from the ToDo list file
+     * @throws ToDoListAccessException 
      */
-    public ArrayList<String> getAllText() {
+    public ArrayList<String> getAllText() throws ToDoListAccessException {
         ArrayList<String> text = new ArrayList<String>();
 
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
@@ -218,8 +236,8 @@ public class FileManager implements ToDoListManager {
                 text.add(currentLine);
             }
         } catch (IOException e) {
-            logger.error("Could not retrieve text");
-            text.add("Error");
+            //logger.error("Could not retrieve text");
+            throw new ToDoListAccessException("Could not retrieve text");
         }
         return text;
     }
@@ -230,9 +248,15 @@ public class FileManager implements ToDoListManager {
      *
      * @param itemKeyword   the keyword to find the items
      * @return itemsWithKeyword   a list of items with the keyword
+     * @throws ToDoListAccessException 
      */
-    public ArrayList<String> getAllItemsWithKeyword(String itemKeyword) {
-            ArrayList<String> allText = getAllText();
+    public ArrayList<String> getAllItemsWithKeyword(String itemKeyword) throws ToDoListAccessException {
+            ArrayList<String> allText;
+            try {
+                allText = getAllText();
+            } catch (ToDoListAccessException e) {
+                throw new ToDoListAccessException(e.getMessage(), e);
+            }
             ArrayList<String> itemsWithKeyword = new ArrayList<String>();
 
             for (int n = 1; n < allText.size(); n++) {
@@ -241,9 +265,6 @@ public class FileManager implements ToDoListManager {
                 }
             }
 
-            if (itemsWithKeyword.isEmpty()) {
-                itemsWithKeyword.add("Error");
-            }
             return itemsWithKeyword;
      }
 
@@ -252,9 +273,14 @@ public class FileManager implements ToDoListManager {
      *
      * @param itemNumber   the item number
      * @return getItem(String itemKeyword)
+     * @throws ToDoListAccessException 
      */
-    public String getItem(int itemNumber) {
-        return getItem(itemNumber +"),");
+    public String getItem(int itemNumber) throws ToDoListAccessException {
+        try {
+            return getItem(itemNumber +"),");
+        } catch (ToDoListAccessException e) {
+            throw new ToDoListAccessException(e.getMessage(), e);
+        } 
     }
 
     /**
@@ -264,15 +290,21 @@ public class FileManager implements ToDoListManager {
      *
      * @param itemKeyword   a keyword to find the items
      * @return the item containing the keyword
+     * @throws ToDoListAccessException 
      */
-    public String getItem(String itemKeyword) {
-        ArrayList<String> text = getAllText();
+    public String getItem(String itemKeyword) throws ToDoListAccessException {
+        ArrayList<String> text;
+        try {
+            text = getAllText();
+        } catch (ToDoListAccessException e) {
+            throw new ToDoListAccessException("Could not retrieve text", e);
+        }
 
         for (int n = 0; n < text.size(); n++) {
             if (text.get(n).contains(itemKeyword)) {
                 return text.get(n);
             }
         }
-        return "Error";
+        return "";
     }
 }

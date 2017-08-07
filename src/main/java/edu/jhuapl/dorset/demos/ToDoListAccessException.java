@@ -16,21 +16,15 @@
  */
 package edu.jhuapl.dorset.demos;
 
-import java.util.ArrayList;
+public class ToDoListAccessException extends Exception {
+    
+    private static final long serialVersionUID = 1L;
 
-public interface ToDoListManager {
+    public ToDoListAccessException(String errorMessage) {
+        super(errorMessage);
+    }
     
-    public String addItem(String item) throws ToDoListAccessException;
-        
-    public String removeItem(int itemNumber) throws ToDoListAccessException;
-    
-    public String removeItem(String itemKeyword) throws ToDoListAccessException;
-    
-    public ArrayList<String> getAllText() throws ToDoListAccessException;
-    
-    public ArrayList<String> getAllItemsWithKeyword(String itemKeyword) throws ToDoListAccessException;
-    
-    public String getItem(int itemNumber) throws ToDoListAccessException;
-    
-    public String getItem(String itemKeyword) throws ToDoListAccessException;
+    public ToDoListAccessException(String errorMessage, Throwable cause) {
+        super(errorMessage, cause);
+    }
 }

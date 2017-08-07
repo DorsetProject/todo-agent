@@ -55,7 +55,7 @@ public class DBManagerTest {
         DBManager manager = new DBManager("Nicole");
 
         String response = manager.removeItem(20);
-        assertTrue(response.contains("Error"));
+        assertTrue(response.isEmpty());
     }
 
     @Test
@@ -64,7 +64,7 @@ public class DBManagerTest {
         manager.addItem("item to r by keyword");
 
         String response = manager.removeItem("item to r by keyword");
-        assertFalse(response.contains("Error"));
+        assertTrue(response.contains("item to r"));
     }
 
     @Test
@@ -72,7 +72,7 @@ public class DBManagerTest {
         DBManager manager = new DBManager("Nicole");
 
         String response = manager.removeItem("non-existent item");
-        assertTrue(response.contains("Error"));
+        assertTrue(response.isEmpty());
     }
 
     @Test
@@ -92,7 +92,7 @@ public class DBManagerTest {
         manager.addItem("Buy supplies");
 
         ArrayList<String> response = manager.getAllItemsWithKeyword("Buy");
-        assertTrue(!response.get(0).contains("Error"));
+        assertTrue(response.get(0).contains("Buy"));
 
         manager.removeItem("Buy supplies");
     }
@@ -102,7 +102,7 @@ public class DBManagerTest {
         DBManager manager = new DBManager("Nicole");
 
         ArrayList<String> response = manager.getAllItemsWithKeyword("non-existent items");
-        assertTrue(response.get(0).contains("Error"));
+        assertTrue(response.isEmpty());
     }
 
     @Test
@@ -122,7 +122,7 @@ public class DBManagerTest {
         DBManager manager = new DBManager("Nicole");
 
         ArrayList<String> response = manager.getAllItemsWithKeyword("July");
-        assertTrue(response.get(0).contains("Error"));
+        assertTrue(response.isEmpty());
     }
 
     @Test
@@ -141,7 +141,7 @@ public class DBManagerTest {
         DBManager manager = new DBManager("Nicole");
 
         String response = manager.getItem(20);
-        assertTrue(response.contains("Error"));
+        assertTrue(response.isEmpty());
     }
 
     @Test
@@ -160,6 +160,6 @@ public class DBManagerTest {
         DBManager manager = new DBManager("Nicole");
 
         String response = manager.getItem("non-existent item");
-        assertTrue(response.contains("Error"));
+        assertTrue(response.isEmpty());
     }
 }

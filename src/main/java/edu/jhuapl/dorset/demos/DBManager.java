@@ -57,7 +57,7 @@ public class DBManager implements ToDoListManager {
         session.save(todoItem);
 
         endSession(session);
-        return item; //"Item added: " + 
+        return item; 
     }
     
     /**
@@ -163,15 +163,14 @@ public class DBManager implements ToDoListManager {
 
         Item item = (Item) session.createCriteria(Item.class)
                         .add(Restrictions.eq("listNumber", itemNumber)).uniqueResult();
-        if (item != null){
-            deleteItemAndUpdateList(session, item);
-        } else {
-            logger.error("Item could not be removed");
-            return "Error"; //: Item could not be added
-        }
 
+        if (item == null){
+            return "";
+        }
+        
+        deleteItemAndUpdateList(session, item);
         endSession(session);
-        return item.toString(); //"Item removed: " + 
+        return item.toString();
     }
 
     private void deleteItemAndUpdateList(Session session,Item item) {
@@ -202,8 +201,7 @@ public class DBManager implements ToDoListManager {
         ArrayList<Item> items = getAllItems();
 
         if (items.isEmpty()) {
-            logger.error("No item matched request");
-            return "Error: Item could not be removed. No item matched your request";
+            return "";
         }
 
         for (int n = 0; n < items.size(); n++) {
@@ -212,11 +210,10 @@ public class DBManager implements ToDoListManager {
                 deleteItemAndUpdateList(session, items.get(n));
 
                 endSession(session);
-                return items.get(n).toString(); // "Item removed: " + 
+                return items.get(n).toString();
             }
         }
-        logger.error("Item could not be removed");
-        return "Error"; //: Item could not be removed. No item number or keyword matched your request
+        return "";
     }
 
     /**
@@ -259,11 +256,6 @@ public class DBManager implements ToDoListManager {
             }
         }
 
-        if (text.isEmpty()) {
-            logger.error("Could not retrieve text");
-            text.add("Error"); //: Could not retrieve text
-        }
-
         endSession(session);
         return text;
     }
@@ -285,9 +277,6 @@ public class DBManager implements ToDoListManager {
             }
         }
 
-        if (itemsWithKeyword.isEmpty()) {
-            itemsWithKeyword.add("Error"); //: No items matched your keyword
-        }
         return itemsWithKeyword;
     }
 
@@ -317,6 +306,6 @@ public class DBManager implements ToDoListManager {
                 return text.get(n);
             }
         }
-        return "Error"; //: Item could not be found
+        return "";
     }
 }

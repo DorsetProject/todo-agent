@@ -38,7 +38,7 @@ public class FileManagerTest {
             assertTrue(response.contains("is an item"));
 
             manager.removeItem("is an item");
-        } catch (IOException e) {
+        } catch (ToDoListAccessException e) {
             assertFalse(false);
         }
     }
@@ -54,7 +54,7 @@ public class FileManagerTest {
             assertTrue(response.contains("1)"));
 
             manager.addItem(item);
-        } catch (IOException e) {
+        } catch (ToDoListAccessException e) {
             assertFalse(false);
         }
     }
@@ -65,8 +65,8 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");
 
             String response = manager.removeItem(20);
-            assertTrue(response.contains("Error"));
-        } catch (IOException e) {
+            assertTrue(response.isEmpty());
+        } catch (ToDoListAccessException e) {
             assertFalse(false);
         }
     }
@@ -79,7 +79,7 @@ public class FileManagerTest {
 
             String response = manager.removeItem("item to r");
             assertTrue(response.contains("item to r"));
-        } catch (IOException e) {
+        } catch (ToDoListAccessException e) {
             assertFalse(false);
         }
     }
@@ -90,8 +90,8 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");
 
             String response = manager.removeItem("non-existent item");
-            assertTrue(response.contains("Error"));
-        } catch (IOException e) {
+            assertTrue(response.isEmpty());
+        } catch (ToDoListAccessException e) {
             assertFalse(false);
         }
     }
@@ -103,7 +103,7 @@ public class FileManagerTest {
 
             String response = manager.getAllText().get(0);
             assertTrue(response.contains("TODO List"));
-        } catch (IOException e) {
+        } catch (ToDoListAccessException e) {
             assertFalse(false);
         }
     }
@@ -119,7 +119,7 @@ public class FileManagerTest {
             assertFalse(response.get(0).contains("Error"));
 
             manager.removeItem("Buy supplies");
-        } catch (IOException e) {
+        } catch (ToDoListAccessException e) {
             assertFalse(false);
         }
     }
@@ -130,8 +130,8 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");
 
             ArrayList<String> response = manager.getAllItemsWithKeyword("non-existent items");
-            assertTrue(response.get(0).contains("Error"));
-        } catch (IOException e) {
+            assertTrue(response.isEmpty());
+        } catch (ToDoListAccessException e) {
             assertFalse(false);
         }
     }
@@ -147,7 +147,7 @@ public class FileManagerTest {
             assertTrue(response.get(0).contains(date));
 
             manager.removeItem("Today's new item");
-        } catch (IOException e) {
+        } catch (ToDoListAccessException e) {
             assertFalse(false);
         }
     }
@@ -158,8 +158,8 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");
 
             ArrayList<String> response = manager.getAllItemsWithKeyword("July");
-            assertTrue(response.get(0).contains("Error"));
-        } catch (IOException e) {
+            assertTrue(response.isEmpty());
+        } catch (ToDoListAccessException e) {
             assertFalse(false);
         }
     }
@@ -171,7 +171,7 @@ public class FileManagerTest {
 
             String response = manager.getItem(1);
             assertTrue(response.contains("1),"));
-        } catch (IOException e) {
+        } catch (ToDoListAccessException e) {
             assertFalse(false);
         }
     }
@@ -182,8 +182,8 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");
 
             String response = manager.getItem(20);
-            assertTrue(response.contains("Error"));
-        } catch (IOException e) {
+            assertTrue(response.isEmpty());
+        } catch (ToDoListAccessException e) {
             assertFalse(false);
         }
     }
@@ -198,7 +198,7 @@ public class FileManagerTest {
             assertTrue(response.contains("this is a new item"));
 
             manager.removeItem("a new item");
-        } catch (IOException e) {
+        } catch (ToDoListAccessException e) {
             assertFalse(false);
         }
     }
@@ -209,8 +209,8 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");
 
             String response = manager.getItem("non-existent item");
-            assertTrue(response.contains("Error"));
-        } catch (IOException e) {
+            assertTrue(response.isEmpty());
+        } catch (ToDoListAccessException e) {
             assertFalse(false);
         }
     }

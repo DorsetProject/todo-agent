@@ -16,7 +16,6 @@
  */
 package edu.jhuapl.dorset.demos;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.slf4j.Logger;
@@ -34,7 +33,7 @@ import edu.jhuapl.dorset.nlp.WhiteSpaceTokenizer;
 
 public class ToDoListAgent extends AbstractAgent {
     private static final Logger logger = LoggerFactory.getLogger(ToDoListAgent.class);
-    
+
     private static final String ADD_REGEX = ".*(ADD).*";
     private static final String REMOVE_REGEX = ".*(REMOVE).*";
     private static final String GET_REGEX = ".*(GET).*";
@@ -48,7 +47,7 @@ public class ToDoListAgent extends AbstractAgent {
     private String name;
     private String dataStorageType;
     private ToDoListManager manager;    
-    
+
     /**
      * Create a ToDoList Agent.
      * This agent creates and manipulates a user's to do list.
@@ -62,14 +61,16 @@ public class ToDoListAgent extends AbstractAgent {
 
         if (dataStorageType.equals("database")) {
             manager = new DBManager(name);
-        } else {
+        } else if (dataStorageType.equals("file")){
             try {
                 manager = new FileManager(name);
-            } catch (IOException e) {
-                logger.error("Could not create file");
+            } catch (ToDoListAccessException e) {
                 manager = null;
             }
+        } else {
+            manager = null;
         }
+        
     }
 
     /**
@@ -77,10 +78,12 @@ public class ToDoListAgent extends AbstractAgent {
      */
     public AgentResponse process(AgentRequest request) {
         if (manager == null) {
+            logger.error("Could not set up manager");
             String responseMessage = "Error: Agent could not set up to do list manager";
             Code responseCode = getAgentResponseStatusCode(responseMessage);
-            createAgentResponse(responseCode, responseMessage);
+            return createAgentResponse(responseCode, responseMessage);
         }
+
         String input = request.getText();
         String inputUpperCase = input.toUpperCase();
 
@@ -97,7 +100,7 @@ public class ToDoListAgent extends AbstractAgent {
             logger.error("Request could not be understood: " + input);
             String responseMessage = "Error: Your request could not be understood. "
                             + "Please use one of the following in your requests: \"ADD\", \"REMOVE\", or \"GET\"";
-            Code responseCode = getAgentResponseStatusCode("not understood");
+            Code responseCode = getAgentResponseStatusCode(responseMessage);
             return createAgentResponse(responseCode, responseMessage);
         }
     }
@@ -110,14 +113,12 @@ public class ToDoListAgent extends AbstractAgent {
      */
     private Code getAgentResponseStatusCode(String responseMessage) {
         Code code;
-        if (responseMessage.contains("manager")) {
-            code = Code.AGENT_INTERNAL_ERROR;
-        }
-        else if (responseMessage.contains("not be understood")){
-            code = Code.AGENT_DID_NOT_UNDERSTAND_REQUEST;
-        }
-        else if (responseMessage.contains("Error")) {
+        if (responseMessage.isEmpty()) { //.contains("Error")
             code = Code.AGENT_DID_NOT_KNOW_ANSWER;
+        } else if (responseMessage.contains("manager")) {
+            code = Code.AGENT_INTERNAL_ERROR;
+        } else if (responseMessage.contains("not be understood")){
+            code = Code.AGENT_DID_NOT_UNDERSTAND_REQUEST;
         } else {
             code = Code.SUCCESS;
         }
@@ -159,7 +160,12 @@ public class ToDoListAgent extends AbstractAgent {
      * @return AgentResponse containing the item added to the to do list
      */
     private AgentResponse addItem(String input) {
-        String managerResponse = manager.addItem(input);
+        String managerResponse;
+        try {
+            managerResponse = manager.addItem(input);
+        } catch (ToDoListAccessException e) {
+           managerResponse = e.getMessage();
+        }
 
         Code responseCode = getAgentResponseStatusCode(managerResponse);
         String responseMessage;
@@ -226,10 +232,14 @@ public class ToDoListAgent extends AbstractAgent {
      * @return the manager response message
      */
     private String getRemoveItemManagerResponse(String input) {
-        if (containsInt(input)) {
-            return manager.removeItem(getitemNumber(input));
-        } else {
-            return manager.removeItem(input);
+        try {
+            if (containsInt(input)) {
+                return manager.removeItem(getitemNumber(input));
+            } else {
+                return manager.removeItem(input);
+            }
+        } catch (ToDoListAccessException e) {
+            return e.getMessage();
         }
     }
 
@@ -336,8 +346,14 @@ public class ToDoListAgent extends AbstractAgent {
      * @return AgentResponse containing the to do list text
      */
     private AgentResponse getAllText() {
-        ArrayList<String> managerResponseList = manager.getAllText();
-        String managerResponse = joinList(managerResponseList);
+        ArrayList<String> managerResponseList;
+        String managerResponse;
+        try {
+            managerResponseList = manager.getAllText();
+            managerResponse = joinList(managerResponseList);
+        } catch (ToDoListAccessException e) {
+            managerResponse = e.getMessage();
+        }
         
         Code responseCode = getAgentResponseStatusCode(managerResponse);
         String responseMessage;
@@ -372,8 +388,14 @@ public class ToDoListAgent extends AbstractAgent {
      * @return AgentResponse containing the items retrieved from the to do list
      */
     private AgentResponse getAllItemsWithKeyword(String keyword) {
-        ArrayList<String> managerResponseList = manager.getAllItemsWithKeyword(keyword);
-        String managerResponse = joinList(managerResponseList);
+        ArrayList<String> managerResponseList;
+        String managerResponse;
+        try {
+            managerResponseList = manager.getAllItemsWithKeyword(keyword);
+            managerResponse = joinList(managerResponseList);
+        } catch (ToDoListAccessException e) {
+            managerResponse = e.getMessage();
+        }
 
         Code responseCode = getAgentResponseStatusCode(managerResponse);
         String responseMessage;
@@ -393,8 +415,13 @@ public class ToDoListAgent extends AbstractAgent {
      * @return AgentResponse containing the item retrieved from the to do list
      */
     private AgentResponse getItem(int itemNumber) {
-        String managerResponse = manager.getItem(itemNumber);
-        
+        String managerResponse;
+        try {
+            managerResponse = manager.getItem(itemNumber);
+        } catch (ToDoListAccessException e) {
+            managerResponse = e.getMessage();
+        }
+
         Code responseCode = getAgentResponseStatusCode(managerResponse);
         String responseMessage;
         if (responseCode.equals(Code.SUCCESS)) {
@@ -413,8 +440,13 @@ public class ToDoListAgent extends AbstractAgent {
      * @return AgentResponse containing the item retrieved from the to do list
      */
     private AgentResponse getItem(String input) {
-        String managerResponse = manager.getItem(input);
-        
+        String managerResponse;
+        try {
+            managerResponse = manager.getItem(input);
+        } catch (ToDoListAccessException e) {
+            managerResponse = e.getMessage();
+        }
+
         Code responseCode = getAgentResponseStatusCode(managerResponse);
         String responseMessage;
         if (responseCode.equals(Code.SUCCESS)) {
