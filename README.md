@@ -10,18 +10,12 @@ Configuration file must be named application.conf
 For database functionality, see sample.cfg.xml for additional configuration example.  
 Configuration file must be named hibernate.cfg.xml  
 
-## Build
-mvn clean package  
-
-## Run
-...
-
 ## Example Requests  
 * ADD <item text>  
 * REMOVE <keyword>  
 * REMOVE <item number>  
 * GET ALL  
 * GET ALL <keyword>  
+* GET ALL <date(mm/dd/yyyy)>  
 * GET <keyword>  
 * GET <item number>  
-* GET ALL <date(mm/dd/yyyy)>  
