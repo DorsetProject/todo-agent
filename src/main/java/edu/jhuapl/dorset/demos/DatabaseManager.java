@@ -26,21 +26,17 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.criterion.Restrictions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class DBManager implements ToDoListManager {
-    private static final Logger logger = LoggerFactory.getLogger(DBManager.class);
+public class DatabaseManager implements ToDoListManager {
 
     private SessionFactory factory;
 
     /**
      * Create a DB Manager
      *
-     * @param toDoListName   the name of ...TODO
+     * @param toDoListName  the name of the ToDo list
      */
-    public DBManager(String toDoListName) {
-        //TODO toDoListName not used
+    public DatabaseManager() {
         Configuration configuration = new Configuration().configure();
         factory = configuration.buildSessionFactory();        
     }
@@ -164,7 +160,7 @@ public class DBManager implements ToDoListManager {
         Item item = (Item) session.createCriteria(Item.class)
                         .add(Restrictions.eq("listNumber", itemNumber)).uniqueResult();
 
-        if (item == null){
+        if (item == null) {
             return "";
         }
         
@@ -172,26 +168,7 @@ public class DBManager implements ToDoListManager {
         endSession(session);
         return item.toString();
     }
-
-    private void deleteItemAndUpdateList(Session session,Item item) {
-        session.delete(item);
-        int listNumberDeleted = item.getListNumber();
-
-        updateListNumbers(session,listNumberDeleted);
-    }
-
-    /**
-     * Update database values in list_number
-     *
-     * @param listNumberDeleted   the list_number deleted from the database
-     */
-    public void updateListNumbers(Session session,int listNumberDeleted) {
-        String hql = "UPDATE " + Item.class.getName() + " SET list_number = list_number -1 WHERE list_number > "
-                        + listNumberDeleted;
-        Query query = session.createQuery(hql);
-        query.executeUpdate();
-    }
-
+    
     /**
      * Remove an item from the database
      *
@@ -216,6 +193,25 @@ public class DBManager implements ToDoListManager {
         return "";
     }
 
+    private void deleteItemAndUpdateList(Session session,Item item) {
+        session.delete(item);
+        int listNumberDeleted = item.getListNumber();
+
+        updateListNumbers(session,listNumberDeleted);
+    }
+
+    /**
+     * Update database values in list_number
+     *
+     * @param listNumberDeleted   the list_number deleted from the database
+     */
+    public void updateListNumbers(Session session,int listNumberDeleted) {
+        String hql = "UPDATE " + Item.class.getName() + " SET list_number = list_number -1 WHERE list_number > "
+                        + listNumberDeleted;
+        Query query = session.createQuery(hql);
+        query.executeUpdate();
+    }
+
     /**
      * Get all items from database
      * 
@@ -229,7 +225,7 @@ public class DBManager implements ToDoListManager {
         for (int n = 1; n <= getItemCount(); n++) {
             Item item = (Item) session.createCriteria(Item.class)
                         .add(Restrictions.eq("listNumber", n)).uniqueResult();
-            if (item != null){
+            if (item != null) {
                 items.add(item);
             }
         }
@@ -251,7 +247,7 @@ public class DBManager implements ToDoListManager {
         for (int n = 1; n <= getItemCount(); n++) {
             Item item = (Item) session.createCriteria(Item.class)
                         .add(Restrictions.eq("listNumber", n)).uniqueResult();
-            if (item != null){
+            if (item != null) {
                 text.add(item.toString());
             }
         }
@@ -287,7 +283,7 @@ public class DBManager implements ToDoListManager {
      * @return getItem(String itemKeyword)
      */
     public String getItem(int itemNumber) {
-        return getItem(itemNumber +"),");
+        return getItem(itemNumber + "),");
     }
 
     /**

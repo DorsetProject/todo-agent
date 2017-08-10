@@ -29,7 +29,7 @@ public class DBManagerTest {
 
     @Test
     public void testAdd() {
-        DBManager manager = new DBManager("Nicole");
+        DatabaseManager manager = new DatabaseManager();
 
         String response = manager.addItem("this is an item");
         assertTrue(response.contains("is an item"));
@@ -39,7 +39,7 @@ public class DBManagerTest {
 
     @Test
     public void testRemoveByNumGood() {
-        DBManager manager = new DBManager("Nicole");
+        DatabaseManager manager = new DatabaseManager();
         manager.addItem("An item");
         String item = manager.getItem(1);
         item = item.substring(item.indexOf("M,") + 2);
@@ -52,7 +52,7 @@ public class DBManagerTest {
 
     @Test
     public void testRemoveByNumBad() {
-        DBManager manager = new DBManager("Nicole");
+        DatabaseManager manager = new DatabaseManager();
 
         String response = manager.removeItem(20);
         assertTrue(response.isEmpty());
@@ -60,7 +60,7 @@ public class DBManagerTest {
 
     @Test
     public void testRemoveByKeywordGood() {
-        DBManager manager = new DBManager("Nicole");
+        DatabaseManager manager = new DatabaseManager();
         manager.addItem("item to r by keyword");
 
         String response = manager.removeItem("item to r by keyword");
@@ -69,7 +69,7 @@ public class DBManagerTest {
 
     @Test
     public void testRemoveByKeywordBad() {
-        DBManager manager = new DBManager("Nicole");
+        DatabaseManager manager = new DatabaseManager();
 
         String response = manager.removeItem("non-existent item");
         assertTrue(response.isEmpty());
@@ -77,7 +77,7 @@ public class DBManagerTest {
 
     @Test
     public void testGetAllText() {
-        DBManager manager = new DBManager("Nicole");    
+        DatabaseManager manager = new DatabaseManager();
         manager.addItem("A new item");
 
         String response = manager.getAllText().get(0);
@@ -88,7 +88,7 @@ public class DBManagerTest {
 
     @Test
     public void testGetAllItemsWithKeywordGood() {
-        DBManager manager = new DBManager("Nicole");
+        DatabaseManager manager = new DatabaseManager();
         manager.addItem("Buy supplies");
 
         ArrayList<String> response = manager.getAllItemsWithKeyword("Buy");
@@ -99,7 +99,7 @@ public class DBManagerTest {
 
     @Test
     public void testGetAllItemsWithKeywordBad() {
-        DBManager manager = new DBManager("Nicole");
+        DatabaseManager manager = new DatabaseManager();
 
         ArrayList<String> response = manager.getAllItemsWithKeyword("non-existent items");
         assertTrue(response.isEmpty());
@@ -107,7 +107,7 @@ public class DBManagerTest {
 
     @Test
     public void testGetAllItemsWithDateGood() {
-        DBManager manager = new DBManager("Nicole");
+        DatabaseManager manager = new DatabaseManager();
         manager.addItem("Today's new item");
         String date = new SimpleDateFormat("MM/dd/yyyy").format(new Date());
 
@@ -119,7 +119,7 @@ public class DBManagerTest {
 
     @Test
     public void testGetAllItemsWithDateBad() {
-        DBManager manager = new DBManager("Nicole");
+        DatabaseManager manager = new DatabaseManager();
 
         ArrayList<String> response = manager.getAllItemsWithKeyword("July");
         assertTrue(response.isEmpty());
@@ -127,7 +127,7 @@ public class DBManagerTest {
 
     @Test
     public void testGetItemByNumGood() {
-        DBManager manager = new DBManager("Nicole");
+        DatabaseManager manager = new DatabaseManager();
         manager.addItem("Buy things");
 
         String response = manager.getItem(1);
@@ -138,7 +138,7 @@ public class DBManagerTest {
 
     @Test
     public void testGetItemByNumBad() {
-        DBManager manager = new DBManager("Nicole");
+        DatabaseManager manager = new DatabaseManager();
 
         String response = manager.getItem(20);
         assertTrue(response.isEmpty());
@@ -146,7 +146,7 @@ public class DBManagerTest {
 
     @Test
     public void testGetItemByKeywordGood() {
-        DBManager manager = new DBManager("Nicole");
+        DatabaseManager manager = new DatabaseManager();
         manager.addItem("this is a new item");
 
         String response = manager.getItem("new item");
@@ -157,7 +157,7 @@ public class DBManagerTest {
 
     @Test
     public void testGetItemByKeywordBad() {
-        DBManager manager = new DBManager("Nicole");
+        DatabaseManager manager = new DatabaseManager();
 
         String response = manager.getItem("non-existent item");
         assertTrue(response.isEmpty());

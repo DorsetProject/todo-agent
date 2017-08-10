@@ -32,9 +32,22 @@ public class Item implements java.io.Serializable {
     private String dateCreated;
     private String timeCreated;
 
+    /**
+     * Create an empty Item for a database
+     */
     public Item() {
     }
 
+
+    /**
+     * Create an Item for a database with the given values
+     *
+     * 
+     * @param listNumber  the item list number
+     * @param task  the task
+     * @param dateCreated  the date the item was created
+     * @param timeCreated  the time the item was created
+     */
     public Item(int listNumber, String task, String dateCreated,
                     String timeCreated) {
         this.listNumber = listNumber;

@@ -39,7 +39,7 @@ public class ToDoListAgent extends AbstractAgent {
     private static final String GET_REGEX = ".*(GET).*";
     private static final String ALL_REGEX = ".*(ALL).*";
     private static final String DIGIT = "[0-9]";
-    private static final String DATE_FORMAT = DIGIT+DIGIT+"/"+DIGIT+DIGIT+"/"+DIGIT+DIGIT+DIGIT+DIGIT;
+    private static final String DATE_FORMAT = DIGIT + DIGIT + "/" + DIGIT + DIGIT + "/" + DIGIT + DIGIT + DIGIT + DIGIT;
 
     private static final String NAME_KEY = "name";
     private static final String DATA_STORAGE_TYPE_KEY = "dataStorageType";
@@ -53,15 +53,15 @@ public class ToDoListAgent extends AbstractAgent {
      * This agent creates and manipulates a user's to do list.
      * A user can add to, remove from, and get items from the to do list.
      *
-     * @param config
+     * @param config  the configuration values
      */
     public ToDoListAgent(Config config) {
         name = config.getString(NAME_KEY);
         dataStorageType = config.getString(DATA_STORAGE_TYPE_KEY);
 
         if (dataStorageType.equals("database")) {
-            manager = new DBManager(name);
-        } else if (dataStorageType.equals("file")){
+            manager = new DatabaseManager();
+        } else if (dataStorageType.equals("file")) {
             try {
                 manager = new FileManager(name);
             } catch (ToDoListAccessException e) {
@@ -75,6 +75,8 @@ public class ToDoListAgent extends AbstractAgent {
 
     /**
      * Process the user's request and determine what to do with it
+     * 
+     * @param request  the user's request
      */
     public AgentResponse process(AgentRequest request) {
         if (manager == null) {
@@ -90,7 +92,7 @@ public class ToDoListAgent extends AbstractAgent {
         if (inputUpperCase.matches(ADD_REGEX)) {
             input = removeAction(input, "ADD");
             return addItem(input);
-        } else if (inputUpperCase.matches(REMOVE_REGEX)){
+        } else if (inputUpperCase.matches(REMOVE_REGEX)) {
             input = removeAction(input, "REMOVE");
             return removeItem(input);
         } else if (inputUpperCase.matches(GET_REGEX)) {
@@ -113,11 +115,11 @@ public class ToDoListAgent extends AbstractAgent {
      */
     private Code getAgentResponseStatusCode(String responseMessage) {
         Code code;
-        if (responseMessage.isEmpty()) { //.contains("Error")
+        if (responseMessage.isEmpty()) {
             code = Code.AGENT_DID_NOT_KNOW_ANSWER;
         } else if (responseMessage.contains("manager")) {
             code = Code.AGENT_INTERNAL_ERROR;
-        } else if (responseMessage.contains("not be understood")){
+        } else if (responseMessage.contains("not be understood")) {
             code = Code.AGENT_DID_NOT_UNDERSTAND_REQUEST;
         } else {
             code = Code.SUCCESS;
@@ -128,9 +130,9 @@ public class ToDoListAgent extends AbstractAgent {
     /**
      * Create an Agent Response based on the code and message passed in
      *
-     * @param code   the Agent Response Status Code
-     * @param responseMessage   the Agent Response message
-     * @return AgentResponse containing the responseMessage
+     * @param code  the Agent Response Status Code
+     * @param responseMessage  the Agent Response message
+     * @return AgentResponse containing the response message
      */
     private AgentResponse createAgentResponse(Code code, String responseMessage) {
         if (code.equals(Code.SUCCESS)) {
@@ -143,20 +145,20 @@ public class ToDoListAgent extends AbstractAgent {
     /**
      * Remove the action word (GET, REMOVE, or ADD) from the user's input
      *
-     * @param input   the user's input
-     * @param action   the action word
+     * @param input  the user's input
+     * @param action  the action word
      * @return the shortened input
      */
     private String removeAction(String input, String action) {
-       int indexToStart = input.indexOf(action) + action.length() + 1;
-       input = input.substring(indexToStart);
-       return input;
+        int indexToStart = input.indexOf(action) + action.length() + 1;
+        input = input.substring(indexToStart);
+        return input;
     }
 
     /**
      * Add an item to the to do list
      *
-     * @param input   the item to add
+     * @param input  the item to add
      * @return AgentResponse containing the item added to the to do list
      */
     private AgentResponse addItem(String input) {
@@ -164,7 +166,7 @@ public class ToDoListAgent extends AbstractAgent {
         try {
             managerResponse = manager.addItem(input);
         } catch (ToDoListAccessException e) {
-           managerResponse = e.getMessage();
+            managerResponse = e.getMessage();
         }
 
         Code responseCode = getAgentResponseStatusCode(managerResponse);
@@ -182,11 +184,11 @@ public class ToDoListAgent extends AbstractAgent {
     /**
      * Return whether the input contains an integer
      *
-     * @param input   the input to check
+     * @param input  the input to check
      * @return whether the input contains an integer or not
      */
     private boolean containsInt(String input) {
-        if (input.matches(DIGIT) || input.matches(DIGIT+DIGIT)) {
+        if (input.matches(DIGIT) || input.matches(DIGIT + DIGIT)) {
             return true;
         } else {
             return false;
@@ -194,10 +196,10 @@ public class ToDoListAgent extends AbstractAgent {
     }
 
     /**
-     * Tokenize the input by its white spaces
+     * Split the input by its white spaces
      *
-     * @param input   the input to be tokenized
-     * @return tokenizedInput   the tokenized input
+     * @param input  the input to be split
+     * @return tokenizedInput  the split up input
      */
     private String[] tokenize(String input) {
         Tokenizer tokenizer = new WhiteSpaceTokenizer();
@@ -208,7 +210,7 @@ public class ToDoListAgent extends AbstractAgent {
     /**
      * Remove an item from the to do list
      *
-     * @param input   the item to remove
+     * @param input  the item to remove
      * @return AgentResponse containing the item removed from the to do list
      */
     private AgentResponse removeItem(String input) {
@@ -228,7 +230,7 @@ public class ToDoListAgent extends AbstractAgent {
     /**
      * Get manager response from removing an item
      *
-     * @param input
+     * @param input  the input to remove
      * @return the manager response message
      */
     private String getRemoveItemManagerResponse(String input) {
@@ -246,13 +248,13 @@ public class ToDoListAgent extends AbstractAgent {
     /**
      * Get the item number
      *
-     * @param input   the input to retrieve the item number from
+     * @param input  the input to retrieve the item number from
      * @return the item number
      */
     private int getitemNumber(String input) {
         String[] tokenizedInput = tokenize(input);
         for (int n = 0; n < tokenizedInput.length; n++) {
-            if (tokenizedInput[n].matches(DIGIT) || input.matches(DIGIT+DIGIT)) {
+            if (tokenizedInput[n].matches(DIGIT) || input.matches(DIGIT + DIGIT)) {
                 return Integer.parseInt(tokenizedInput[n]);
             }
         }
@@ -262,7 +264,7 @@ public class ToDoListAgent extends AbstractAgent {
     /**
      * Determine what is to be retrieved from the to do list and get it
      *
-     * @param input   what to get from the to do list
+     * @param input  what to get from the to do list
      * @return AgentResponse containing the item retrieved from the to do list
      */
     private AgentResponse get(String input) {   
@@ -295,7 +297,7 @@ public class ToDoListAgent extends AbstractAgent {
     /**
      * Return whether the input contains "ALL"
      *
-     * @param input   the input to check
+     * @param input  the input to check
      * @return whether the input contains "ALL"
      */
     private boolean containsAll(String input) {
@@ -308,8 +310,8 @@ public class ToDoListAgent extends AbstractAgent {
     /**
      * Get the date from the tokenized input
      *
-     * @param tokenizedInput   the input to check
-     * @return date   the date from the input or an empty string
+     * @param tokenizedInput  the input to check
+     * @return date  the date from the input or an empty string
      */
     private String getDate(String[] tokenizedInput) {
         String date = "";
@@ -324,8 +326,8 @@ public class ToDoListAgent extends AbstractAgent {
     /**
      * Get the keyword from the tokenized input
      *
-     * @param tokenizedInput   the input to check
-     * @return keyword   the keyword from the input or an empty string
+     * @param tokenizedInput  the input to check
+     * @return keyword  the keyword from the input or an empty string
      */
     private String getKeyword(String[] tokenizedInput) {
         String keyword = "";
@@ -370,8 +372,8 @@ public class ToDoListAgent extends AbstractAgent {
     /**
      * Combine the contents of an ArrayList into one string
      *
-     * @param list   the Arraylist to be combined
-     * @return text   the contents of the combined Arraylist
+     * @param list  the Arraylist to be combined
+     * @return text  the contents of the combined Arraylist
      */
     private String joinList(ArrayList<String> list) {
         String text = "";
@@ -384,7 +386,7 @@ public class ToDoListAgent extends AbstractAgent {
     /**
      * Get all items from the to do list containing a keyword
      *
-     * @param keyword   the keyword to find the items
+     * @param keyword  the keyword to find the items
      * @return AgentResponse containing the items retrieved from the to do list
      */
     private AgentResponse getAllItemsWithKeyword(String keyword) {
@@ -411,7 +413,7 @@ public class ToDoListAgent extends AbstractAgent {
     /**
      * Get an item from the to do list
      *
-     * @param input   the item to get from the to do list
+     * @param input  the item to get from the to do list
      * @return AgentResponse containing the item retrieved from the to do list
      */
     private AgentResponse getItem(int itemNumber) {
@@ -436,7 +438,7 @@ public class ToDoListAgent extends AbstractAgent {
     /**
      * Get an item from the to do list
      *
-     * @param input   the item to get from the to do list
+     * @param input  the item to get from the to do list
      * @return AgentResponse containing the item retrieved from the to do list
      */
     private AgentResponse getItem(String input) {

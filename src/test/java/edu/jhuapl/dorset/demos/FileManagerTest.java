@@ -18,7 +18,6 @@ package edu.jhuapl.dorset.demos;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
