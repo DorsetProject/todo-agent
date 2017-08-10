@@ -25,7 +25,7 @@ import java.util.Date;
 
 import org.junit.Test;
 
-public class DBManagerTest {
+public class DatabaseManagerTest {
 
     @Test
     public void testAdd() {
