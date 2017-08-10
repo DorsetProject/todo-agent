@@ -60,7 +60,11 @@ public class ToDoListAgent extends AbstractAgent {
         dataStorageType = config.getString(DATA_STORAGE_TYPE_KEY);
 
         if (dataStorageType.equals("database")) {
-            manager = new DatabaseManager();
+            try {
+                manager = new DatabaseManager();
+            } catch (ToDoListAccessException e) {
+                manager = null;
+            }
         } else if (dataStorageType.equals("file")) {
             try {
                 manager = new FileManager(name);
@@ -115,7 +119,7 @@ public class ToDoListAgent extends AbstractAgent {
      */
     private Code getAgentResponseStatusCode(String responseMessage) {
         Code code;
-        if (responseMessage.isEmpty()) {
+        if (responseMessage == null || responseMessage.isEmpty()) {
             code = Code.AGENT_DID_NOT_KNOW_ANSWER;
         } else if (responseMessage.contains("manager")) {
             code = Code.AGENT_INTERNAL_ERROR;
@@ -147,7 +151,7 @@ public class ToDoListAgent extends AbstractAgent {
      *
      * @param input  the user's input
      * @param action  the action word
-     * @return the shortened input
+     * @return input  the input without the action word
      */
     private String removeAction(String input, String action) {
         int indexToStart = input.indexOf(action) + action.length() + 1;
@@ -214,7 +218,7 @@ public class ToDoListAgent extends AbstractAgent {
      * @return AgentResponse containing the item removed from the to do list
      */
     private AgentResponse removeItem(String input) {
-        String managerResponse = getRemoveItemManagerResponse(input);
+        String managerResponse = getResponseAndRemoveItem(input);
         
         Code responseCode = getAgentResponseStatusCode(managerResponse);
         String responseMessage;
@@ -233,7 +237,7 @@ public class ToDoListAgent extends AbstractAgent {
      * @param input  the input to remove
      * @return the manager response message
      */
-    private String getRemoveItemManagerResponse(String input) {
+    private String getResponseAndRemoveItem(String input) {
         try {
             if (containsInt(input)) {
                 return manager.removeItem(getitemNumber(input));
@@ -343,9 +347,9 @@ public class ToDoListAgent extends AbstractAgent {
     }
 
     /**
-     * Get all the text from the to do list
+     * Get all the text from the todo list
      *
-     * @return AgentResponse containing the to do list text
+     * @return AgentResponse containing the text
      */
     private AgentResponse getAllText() {
         ArrayList<String> managerResponseList;
@@ -356,7 +360,6 @@ public class ToDoListAgent extends AbstractAgent {
         } catch (ToDoListAccessException e) {
             managerResponse = e.getMessage();
         }
-        
         Code responseCode = getAgentResponseStatusCode(managerResponse);
         String responseMessage;
         if (responseCode.equals(Code.SUCCESS)) {
@@ -384,10 +387,10 @@ public class ToDoListAgent extends AbstractAgent {
     }
 
     /**
-     * Get all items from the to do list containing a keyword
+     * Get all items containing a keyword
      *
      * @param keyword  the keyword to find the items
-     * @return AgentResponse containing the items retrieved from the to do list
+     * @return AgentResponse containing the items retrieved
      */
     private AgentResponse getAllItemsWithKeyword(String keyword) {
         ArrayList<String> managerResponseList;
@@ -411,10 +414,10 @@ public class ToDoListAgent extends AbstractAgent {
     }
 
     /**
-     * Get an item from the to do list
+     * Get the item number with the appropriate item number
      *
-     * @param input  the item to get from the to do list
-     * @return AgentResponse containing the item retrieved from the to do list
+     * @param itemNumber  the number of the item to be retrieved
+     * @return AgentResponse containing the item retrieved
      */
     private AgentResponse getItem(int itemNumber) {
         String managerResponse;
@@ -436,10 +439,10 @@ public class ToDoListAgent extends AbstractAgent {
     }
 
     /**
-     * Get an item from the to do list
+     * Get the item containing the keyword
      *
-     * @param input  the item to get from the to do list
-     * @return AgentResponse containing the item retrieved from the to do list
+     * @param input  the keyword of the item to be retrieved
+     * @return AgentResponse containing the item retrieved
      */
     private AgentResponse getItem(String input) {
         String managerResponse;

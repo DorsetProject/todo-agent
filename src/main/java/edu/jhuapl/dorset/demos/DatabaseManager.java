@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -34,17 +35,21 @@ public class DatabaseManager implements ToDoListManager {
     /**
      * Create a DB Manager
      *
-     * @param toDoListName  the name of the ToDo list
+     * @throws ToDoListAccessException 
      */
-    public DatabaseManager() {
-        Configuration configuration = new Configuration().configure();
-        factory = configuration.buildSessionFactory();        
+    public DatabaseManager() throws ToDoListAccessException {
+        try {
+            Configuration configuration = new Configuration().configure();
+            factory = configuration.buildSessionFactory();
+        } catch (HibernateException e) {
+            throw new ToDoListAccessException("Invalid hibernate configuration. See sample.cfg.xml");
+        }
     }
 
     /**
      * Add an item to the database
      *
-     * @return the item to add
+     * @return item  the item to add
      */
     public String addItem(String item) {        
         Session session = getSession();
@@ -59,7 +64,7 @@ public class DatabaseManager implements ToDoListManager {
     /**
      * Create and get a new Session
      *
-     * @return session   the new Session
+     * @return session  the new Session
      */
     private Session getSession() {
         Session session = factory.openSession();
@@ -70,7 +75,7 @@ public class DatabaseManager implements ToDoListManager {
     /**
      * Commit and close current Session
      *
-     * @param session   Session to close
+     * @param session  the session to close
      */
     private void endSession(Session session) {
         session.getTransaction().commit();
@@ -80,8 +85,8 @@ public class DatabaseManager implements ToDoListManager {
     /**
      * Create a new item with given task
      *
-     * @param task   the task for the new item
-     * @return todoItem   the new item to be added
+     * @param task  the task for the new item
+     * @return todoItem  the new item to be added
      */
     private Item createItem(String task) {
         Item todoItem = new Item();
@@ -96,17 +101,16 @@ public class DatabaseManager implements ToDoListManager {
     }
 
     /**
-     * get the number of items in the database
+     * Get the number of items in the database
      *
-     * @return itemCount   the number of items in the database
+     * @return itemCount  the number of items in the database
      */
     private int getItemCount() {
         Session session = getSession();
 
         String hql = "SELECT COUNT(item_id) FROM " + Item.class.getName();
         Query query = session.createQuery(hql);
-        String response = getQueryResponse(query);
-        int itemCount = Integer.parseInt(response);
+        int itemCount = getQueryResponseItemCount(query);
         
         endSession(session);
         return itemCount;
@@ -115,14 +119,15 @@ public class DatabaseManager implements ToDoListManager {
     /**
      * Get response from query
      *
-     * @param session   the current Session
-     * @param hql   the HQL query
-     * @return response   the query response
+     * @param query  the query request
+     * @return itemCount  the query response
      */
-    private String getQueryResponse(Query query) {
+    private int getQueryResponseItemCount(Query query) {
         String response = query.list().toString();
         response = response.substring(1, response.indexOf("]"));
-        return response;
+        int itemCount = Integer.parseInt(response);
+
+        return itemCount;
     }
 
     /**
@@ -152,19 +157,22 @@ public class DatabaseManager implements ToDoListManager {
     /**
      * Remove an item from the database based on its item number
      * 
-     * @return item.toString()   the string value of the item retrieved from the database
+     * @param itemNumber  the number of the item to be retrieved
+     * @return the item retrieved represented as a string
      */
     public String removeItem(int itemNumber) {
         Session session = getSession();
 
         Item item = (Item) session.createCriteria(Item.class)
                         .add(Restrictions.eq("listNumber", itemNumber)).uniqueResult();
-
         if (item == null) {
-            return "";
+            return null;
         }
         
-        deleteItemAndUpdateList(session, item);
+        session.delete(item);
+        int listNumberDeleted = item.getListNumber();
+        updateNumbers(session, listNumberDeleted);
+        
         endSession(session);
         return item.toString();
     }
@@ -172,40 +180,41 @@ public class DatabaseManager implements ToDoListManager {
     /**
      * Remove an item from the database
      *
-     * @return item removed
+     * @param itemKeyword  the keyword to find the item
+     * @return the item removed
      */
     public String removeItem(String itemKeyword) {
         ArrayList<Item> items = getAllItems();
+        itemKeyword = itemKeyword.toLowerCase();
 
         if (items.isEmpty()) {
-            return "";
+            return null;
         }
 
         for (int n = 0; n < items.size(); n++) {
-            if (items.get(n).toString().contains(itemKeyword)) {
+            String itemLowerCase = items.get(n).toString().toLowerCase();
+            if (itemLowerCase.contains(itemKeyword)) {
                 Session session = getSession();
-                deleteItemAndUpdateList(session, items.get(n));
+                
+                Item item = items.get(n);
+                session.delete(item);
+                int listNumberDeleted = item.getListNumber();
+                updateNumbers(session, listNumberDeleted);
 
                 endSession(session);
                 return items.get(n).toString();
             }
         }
-        return "";
-    }
-
-    private void deleteItemAndUpdateList(Session session,Item item) {
-        session.delete(item);
-        int listNumberDeleted = item.getListNumber();
-
-        updateListNumbers(session,listNumberDeleted);
+        return null;
     }
 
     /**
      * Update database values in list_number
      *
-     * @param listNumberDeleted   the list_number deleted from the database
+     * @param session  the current session
+     * @param listNumberDeleted  the list_number deleted from the database
      */
-    public void updateListNumbers(Session session,int listNumberDeleted) {
+    public void updateNumbers(Session session, int listNumberDeleted) {
         String hql = "UPDATE " + Item.class.getName() + " SET list_number = list_number -1 WHERE list_number > "
                         + listNumberDeleted;
         Query query = session.createQuery(hql);
@@ -215,7 +224,7 @@ public class DatabaseManager implements ToDoListManager {
     /**
      * Get all items from database
      * 
-     * @return items   ArrayList of items from database
+     * @return items  a list of items from database
      */
     private ArrayList<Item> getAllItems() {
         Session session = getSession();
@@ -237,7 +246,7 @@ public class DatabaseManager implements ToDoListManager {
     /**
      * Get all text from database
      * 
-     * @return items   ArrayList of text from database
+     * @return items  a list of text from database
      */
     public ArrayList<String> getAllText() {
         Session session = getSession();
@@ -258,29 +267,28 @@ public class DatabaseManager implements ToDoListManager {
 
     /**
      * Get all the items with the keyword.
-     * This method is case sensitive
      *
-     * @param itemKeyword   the keyword to find the items
-     * @return itemsWithKeyword   a list of items with the keyword
+     * @param itemKeyword  the keyword to find the items
+     * @return itemsWithKeyword  a list of items with the keyword
      */
     public ArrayList<String> getAllItemsWithKeyword(String itemKeyword) {
         ArrayList<String> allText = getAllText();
         ArrayList<String> itemsWithKeyword = new ArrayList<String>();
+        itemKeyword = itemKeyword.toLowerCase();
 
         for (int n = 0; n < allText.size(); n++) {
-            if (allText.get(n).contains(itemKeyword)) {
+            if (allText.get(n).toLowerCase().contains(itemKeyword)) {
                 itemsWithKeyword.add(allText.get(n));
             }
         }
-
         return itemsWithKeyword;
     }
 
     /**
      * Get the item based on the item number
      *
-     * @param itemNumber   the item number
-     * @return getItem(String itemKeyword)
+     * @param itemNumber  the number of the item to be retrieved
+     * @return the item with the given item number
      */
     public String getItem(int itemNumber) {
         return getItem(itemNumber + "),");
@@ -289,19 +297,19 @@ public class DatabaseManager implements ToDoListManager {
     /**
      * Get the item based on a keyword.
      * If there are two or more items with the keyword, the first in the list will be returned.
-     * This method is case sensitive
      *
-     * @param itemKeyword   a keyword to find the items
+     * @param itemKeyword  a keyword to find the items
      * @return the item containing the keyword
      */
     public String getItem(String itemKeyword) {
         ArrayList<String> text = getAllText();
+        itemKeyword = itemKeyword.toLowerCase();
 
         for (int n = 0; n < text.size(); n++) {
-            if (text.get(n).contains(itemKeyword)) {
+            if (text.get(n).toLowerCase().contains(itemKeyword)) {
                 return text.get(n);
             }
         }
-        return "";
+        return null;
     }
 }

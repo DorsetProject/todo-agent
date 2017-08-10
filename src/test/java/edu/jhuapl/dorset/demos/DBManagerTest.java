@@ -29,137 +29,193 @@ public class DBManagerTest {
 
     @Test
     public void testAdd() {
-        DatabaseManager manager = new DatabaseManager();
+        try {
+            DatabaseManager manager = new DatabaseManager();
 
-        String response = manager.addItem("this is an item");
-        assertTrue(response.contains("is an item"));
-
-        manager.removeItem("is an item");
+            String response = manager.addItem("this is an item");
+            assertTrue(response.contains("is an item"));
+    
+            manager.removeItem("is an item");
+        } catch (ToDoListAccessException e) {
+            assertTrue(false);
+        }
     }
 
     @Test
     public void testRemoveByNumGood() {
-        DatabaseManager manager = new DatabaseManager();
-        manager.addItem("An item");
-        String item = manager.getItem(1);
-        item = item.substring(item.indexOf("M,") + 2);
-
-        String response = manager.removeItem(1);
-        assertFalse(response.contains("Error"));
-
-        manager.addItem(item);
+        try {
+            DatabaseManager manager = new DatabaseManager();
+        
+            manager.addItem("An item");
+            String item = manager.getItem(1);
+            item = item.substring(item.indexOf("M,") + 2);
+    
+            String response = manager.removeItem(1);
+            assertFalse(response.contains("Error"));
+    
+            manager.addItem(item);
+        } catch (ToDoListAccessException e) {
+            assertTrue(false);
+        }
     }
 
     @Test
     public void testRemoveByNumBad() {
-        DatabaseManager manager = new DatabaseManager();
-
-        String response = manager.removeItem(20);
-        assertTrue(response.isEmpty());
+        try {
+            DatabaseManager manager = new DatabaseManager();
+            String response = manager.removeItem(20);
+            assertTrue(response == null);
+        } catch (ToDoListAccessException e) {
+            assertTrue(false);
+        }
     }
 
     @Test
     public void testRemoveByKeywordGood() {
-        DatabaseManager manager = new DatabaseManager();
-        manager.addItem("item to r by keyword");
-
-        String response = manager.removeItem("item to r by keyword");
-        assertTrue(response.contains("item to r"));
+        try {
+            DatabaseManager manager = new DatabaseManager();
+            manager.addItem("item to r by keyword");
+    
+            String response = manager.removeItem("item to r by keyword");
+            assertTrue(response.contains("item to r"));
+        } catch (ToDoListAccessException e) {
+            assertTrue(false);
+        }
     }
 
     @Test
     public void testRemoveByKeywordBad() {
-        DatabaseManager manager = new DatabaseManager();
-
-        String response = manager.removeItem("non-existent item");
-        assertTrue(response.isEmpty());
+        try {
+            DatabaseManager manager = new DatabaseManager();
+    
+            String response = manager.removeItem("non-existent item");
+            assertTrue(response == null);
+        } catch (ToDoListAccessException e) {
+            assertTrue(false);
+        }
     }
 
     @Test
     public void testGetAllText() {
-        DatabaseManager manager = new DatabaseManager();
-        manager.addItem("A new item");
-
-        String response = manager.getAllText().get(0);
-        assertTrue(response.contains("1),"));
-
-        manager.removeItem("A new item");
+        try {
+            DatabaseManager manager = new DatabaseManager();
+            manager.addItem("A new item");
+    
+            String response = manager.getAllText().get(0);
+            assertTrue(response.contains("1),"));
+    
+            manager.removeItem("A new item");
+        } catch (ToDoListAccessException e) {
+            assertTrue(false);
+        }
     }
 
     @Test
     public void testGetAllItemsWithKeywordGood() {
-        DatabaseManager manager = new DatabaseManager();
-        manager.addItem("Buy supplies");
-
-        ArrayList<String> response = manager.getAllItemsWithKeyword("Buy");
-        assertTrue(response.get(0).contains("Buy"));
-
-        manager.removeItem("Buy supplies");
+        try {
+            DatabaseManager manager = new DatabaseManager();
+            manager.addItem("Buy supplies");
+    
+            ArrayList<String> response = manager.getAllItemsWithKeyword("Buy");
+            assertTrue(response.get(0).contains("Buy"));
+    
+            manager.removeItem("Buy supplies");
+        } catch (ToDoListAccessException e) {
+            assertTrue(false);
+        }
     }
 
     @Test
     public void testGetAllItemsWithKeywordBad() {
-        DatabaseManager manager = new DatabaseManager();
+        try {
+            DatabaseManager manager = new DatabaseManager();
 
-        ArrayList<String> response = manager.getAllItemsWithKeyword("non-existent items");
-        assertTrue(response.isEmpty());
+            ArrayList<String> response = manager.getAllItemsWithKeyword("non-existent items");
+            assertTrue(response.isEmpty());
+        } catch (ToDoListAccessException e) {
+            assertTrue(false);
+        }
     }
 
     @Test
     public void testGetAllItemsWithDateGood() {
-        DatabaseManager manager = new DatabaseManager();
-        manager.addItem("Today's new item");
-        String date = new SimpleDateFormat("MM/dd/yyyy").format(new Date());
-
-        ArrayList<String> response = manager.getAllItemsWithKeyword(date);
-        assertTrue(response.get(0).contains(date));
-
-        manager.removeItem("Today's new item");
+        try {
+            DatabaseManager manager = new DatabaseManager();
+            manager.addItem("Today's new item");
+            String date = new SimpleDateFormat("MM/dd/yyyy").format(new Date());
+    
+            ArrayList<String> response = manager.getAllItemsWithKeyword(date);
+            assertTrue(response.get(0).contains(date));
+    
+            manager.removeItem("Today's new item");
+        } catch (ToDoListAccessException e) {
+            assertTrue(false);
+        }
     }
 
     @Test
     public void testGetAllItemsWithDateBad() {
-        DatabaseManager manager = new DatabaseManager();
-
-        ArrayList<String> response = manager.getAllItemsWithKeyword("July");
-        assertTrue(response.isEmpty());
+        try {
+            DatabaseManager manager = new DatabaseManager();
+            ArrayList<String> response = manager.getAllItemsWithKeyword("July");
+            assertTrue(response.isEmpty());
+        } catch (ToDoListAccessException e) {
+            assertTrue(false);
+        }
     }
 
     @Test
     public void testGetItemByNumGood() {
-        DatabaseManager manager = new DatabaseManager();
-        manager.addItem("Buy things");
-
-        String response = manager.getItem(1);
-        assertTrue(response.contains("1),"));
-
-        manager.removeItem("Buy things");
+        try {
+            DatabaseManager manager = new DatabaseManager();
+            manager.addItem("Buy things");
+    
+            String response = manager.getItem(1);
+            assertTrue(response.contains("1),"));
+    
+            manager.removeItem("Buy things");
+        } catch (ToDoListAccessException e) {
+            assertTrue(false);
+        }
     }
 
     @Test
     public void testGetItemByNumBad() {
-        DatabaseManager manager = new DatabaseManager();
+        try {
+            DatabaseManager manager = new DatabaseManager();
 
-        String response = manager.getItem(20);
-        assertTrue(response.isEmpty());
+            String response = manager.getItem(20);
+            assertTrue(response == null);
+        } catch (ToDoListAccessException e) {
+            assertTrue(false);
+        }
     }
 
     @Test
     public void testGetItemByKeywordGood() {
-        DatabaseManager manager = new DatabaseManager();
-        manager.addItem("this is a new item");
-
-        String response = manager.getItem("new item");
-        assertTrue(response.contains("this is a new item"));
-
-        manager.removeItem("a new item");
+        try {
+            DatabaseManager manager = new DatabaseManager();
+        
+            manager.addItem("this is a new item");
+    
+            String response = manager.getItem("new item");
+            assertTrue(response.contains("this is a new item"));
+    
+            manager.removeItem("a new item");
+        } catch (ToDoListAccessException e) {
+            assertTrue(false);
+        }
     }
 
     @Test
     public void testGetItemByKeywordBad() {
-        DatabaseManager manager = new DatabaseManager();
+        try {
+            DatabaseManager manager = new DatabaseManager();
 
-        String response = manager.getItem("non-existent item");
-        assertTrue(response.isEmpty());
+            String response = manager.getItem("non-existent item");
+            assertTrue(response == null);
+        } catch (ToDoListAccessException e) {
+            assertTrue(false);
+        }
     }
 }

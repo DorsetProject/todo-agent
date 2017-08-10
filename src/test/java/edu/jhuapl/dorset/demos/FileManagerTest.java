@@ -38,7 +38,7 @@ public class FileManagerTest {
 
             manager.removeItem("is an item");
         } catch (ToDoListAccessException e) {
-            assertFalse(false);
+            assertTrue(false);
         }
     }
 
@@ -54,7 +54,7 @@ public class FileManagerTest {
 
             manager.addItem(item);
         } catch (ToDoListAccessException e) {
-            assertFalse(false);
+            assertTrue(false);
         }
     }
 
@@ -64,9 +64,9 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");
 
             String response = manager.removeItem(20);
-            assertTrue(response.isEmpty());
+            assertTrue(response == null);
         } catch (ToDoListAccessException e) {
-            assertFalse(false);
+            assertTrue(false);
         }
     }
 
@@ -79,7 +79,7 @@ public class FileManagerTest {
             String response = manager.removeItem("item to r");
             assertTrue(response.contains("item to r"));
         } catch (ToDoListAccessException e) {
-            assertFalse(false);
+            assertTrue(false);
         }
     }
 
@@ -89,9 +89,9 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");
 
             String response = manager.removeItem("non-existent item");
-            assertTrue(response.isEmpty());
+            assertTrue(response == null);
         } catch (ToDoListAccessException e) {
-            assertFalse(false);
+            assertTrue(false);
         }
     }
 
@@ -101,9 +101,10 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");      
 
             String response = manager.getAllText().get(0);
+            System.out.println(manager.getAllText());
             assertTrue(response.contains("TODO List"));
         } catch (ToDoListAccessException e) {
-            assertFalse(false);
+            assertTrue(false);
         }
     }
 
@@ -119,7 +120,7 @@ public class FileManagerTest {
 
             manager.removeItem("Buy supplies");
         } catch (ToDoListAccessException e) {
-            assertFalse(false);
+            assertTrue(false);
         }
     }
 
@@ -131,7 +132,7 @@ public class FileManagerTest {
             ArrayList<String> response = manager.getAllItemsWithKeyword("non-existent items");
             assertTrue(response.isEmpty());
         } catch (ToDoListAccessException e) {
-            assertFalse(false);
+            assertTrue(false);
         }
     }
 
@@ -147,7 +148,7 @@ public class FileManagerTest {
 
             manager.removeItem("Today's new item");
         } catch (ToDoListAccessException e) {
-            assertFalse(false);
+            assertTrue(false);
         }
     }
 
@@ -159,7 +160,7 @@ public class FileManagerTest {
             ArrayList<String> response = manager.getAllItemsWithKeyword("July");
             assertTrue(response.isEmpty());
         } catch (ToDoListAccessException e) {
-            assertFalse(false);
+            assertTrue(false);
         }
     }
 
@@ -171,7 +172,7 @@ public class FileManagerTest {
             String response = manager.getItem(1);
             assertTrue(response.contains("1),"));
         } catch (ToDoListAccessException e) {
-            assertFalse(false);
+            assertTrue(false);
         }
     }
 
@@ -181,9 +182,9 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");
 
             String response = manager.getItem(20);
-            assertTrue(response.isEmpty());
+            assertTrue(response == null);
         } catch (ToDoListAccessException e) {
-            assertFalse(false);
+            assertTrue(false);
         }
     }
 
@@ -198,7 +199,7 @@ public class FileManagerTest {
 
             manager.removeItem("a new item");
         } catch (ToDoListAccessException e) {
-            assertFalse(false);
+            assertTrue(false);
         }
     }
 
@@ -208,9 +209,9 @@ public class FileManagerTest {
             FileManager manager = new FileManager("Nicole");
 
             String response = manager.getItem("non-existent item");
-            assertTrue(response.isEmpty());
+            assertTrue(response == null);
         } catch (ToDoListAccessException e) {
-            assertFalse(false);
+            assertTrue(false);
         }
     }
 }

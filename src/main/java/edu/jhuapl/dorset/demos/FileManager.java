@@ -46,7 +46,7 @@ public class FileManager implements ToDoListManager {
         try {
             if (!file.exists()) {
                 file.createNewFile();
-                writeTitle(file, "'s TODO List:");
+                writeTitle(file);
             }
         } catch (IOException | ToDoListAccessException e) {
             throw new ToDoListAccessException("Could not create file", e);
@@ -55,14 +55,14 @@ public class FileManager implements ToDoListManager {
 
     /**
      * Write the title of the file
-     * @throws ToDoListAccessException 
      *
-     * @throws IOException  if the file exists but is a directory rather than a file or cannot be opened
+     * @param file  the toDo list file
+     * @throws ToDoListAccessException  if the file exists but is a directory rather than a file or cannot be opened
      */
-    private void writeTitle(File file, String titleExtension) throws ToDoListAccessException {
+    private void writeTitle(File file) throws ToDoListAccessException {
         try {
             BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
-            bufferedWriter.write(toDoListName + titleExtension);
+            bufferedWriter.write(toDoListName + " TODO List");
             bufferedWriter.close();
         } catch (IOException e) {
             throw new ToDoListAccessException("Could not write title", e);
@@ -76,15 +76,15 @@ public class FileManager implements ToDoListManager {
      * @throws ToDoListAccessException  if the toDo list cannot be accessed
      */
     public String addItem(String item) throws ToDoListAccessException {
-        ArrayList<String> text;
+        int nextNumber;
         try {
-            text = getAllText();
+            nextNumber = getAllText().size();
         } catch (ToDoListAccessException e) {
             throw new ToDoListAccessException(e.getMessage(), e);
         }
 
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file, true))) {
-            bufferedWriter.write("\n" + text.size() + ")," + getDate() + "," + getTime() + "," + item);
+            bufferedWriter.write("\n" + nextNumber + ")," + getDate() + "," + getTime() + "," + item);
             return item;
         } catch (IOException e) {
             throw new ToDoListAccessException("Item could not be added: " + item, e);
@@ -113,10 +113,11 @@ public class FileManager implements ToDoListManager {
         return time.format(new Date());
     }
 
+
     /**
      * Remove an item from the ToDo list file
      *
-     * @param itemNumber  the item number
+     * @param itemNumber  the number of the item to be retrieved
      * @return the item removed
      * @throws ToDoListAccessException  if the item cannot be removed
      */
@@ -159,8 +160,8 @@ public class FileManager implements ToDoListManager {
 
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file))) {
             for (int n = 0; n < text.size(); n++) {
-                String itemN = text.get(n).toLowerCase();
-                boolean textContains = itemN.contains(itemKeyword);
+                String itemN = text.get(n);
+                boolean textContains = itemN.toLowerCase().contains(itemKeyword);
                 if (!textContains) {
                     rewriteItem(itemN, bufferedWriter, counter);
                     counter++;
@@ -170,7 +171,7 @@ public class FileManager implements ToDoListManager {
             }
 
             if (lineRemoved.isEmpty()) {
-                return "";
+                return null;
             }
         } catch (IOException e) {
             throw new ToDoListAccessException("Item could not be removed", e);
@@ -181,7 +182,7 @@ public class FileManager implements ToDoListManager {
     /**
      * Write items back into file
      *
-     * @param text  the item to add
+     * @param text  the item text to add
      * @param bufferedWriter  writes the text to a character-output stream
      * @param counter  the item number
      * @throws ToDoListAccessException  if an error occurs while writing text
@@ -262,8 +263,8 @@ public class FileManager implements ToDoListManager {
     /**
      * Get the item based on the item number
      *
-     * @param itemNumber  the item number
-     * @return the item
+     * @param itemNumber  the number of the item to be retrieved
+     * @return the item retrieved
      * @throws ToDoListAccessException  if the item cannot be retrieved
      */
     public String getItem(int itemNumber) throws ToDoListAccessException {
@@ -298,6 +299,6 @@ public class FileManager implements ToDoListManager {
                 return allText.get(n);
             }
         }
-        return "";
+        return null;
     }
 }
