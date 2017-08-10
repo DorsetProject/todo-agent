@@ -11,11 +11,11 @@ For database functionality, see sample.cfg.xml for additional configuration exam
 Configuration file must be named hibernate.cfg.xml  
 
 ## Example Requests  
-* ADD <item text>  
-* REMOVE <keyword>  
-* REMOVE <item number>  
+* ADD [item text]  
+* REMOVE [keyword]  
+* REMOVE [item number]  
 * GET ALL  
-* GET ALL <keyword>  
-* GET ALL <date(mm/dd/yyyy)>  
-* GET <keyword>  
-* GET <item number>  
+* GET ALL [keyword]  
+* GET ALL [date(mm/dd/yyyy)]  
+* GET [keyword]  
+* GET [item number]  
